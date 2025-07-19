@@ -78,6 +78,7 @@ deploy_production:
     - echo "🚀 Деплой на продакшен сервер..."
     - ssh $PRODUCTION_USER@$PRODUCTION_HOST "
         cd ~/backend-api &&
+        git remote set-url origin https://gitlab-ci-token:$GITLAB_TOKEN@gitlab.com/jes11sy-group/backend.git &&
         git pull origin main &&
         echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY &&
         docker-compose -f deployment/docker-compose.production.yml pull &&
