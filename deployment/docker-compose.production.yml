@@ -33,7 +33,9 @@ services:
 
   # Backend API
   backend:
-    image: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHA:-latest}
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.production
     container_name: backend-production
     restart: unless-stopped
     environment:

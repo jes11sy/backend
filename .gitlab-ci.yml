@@ -5,7 +5,7 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
-  REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+  REGISTRY_IMAGE: "registry.gitlab.com/jes11sy-group/backend"
   PRODUCTION_HOST: "api.lead-schem.ru"
 
 # Кеширование для ускорения сборки
@@ -84,8 +84,7 @@ deploy_production:
         cd ~/backend-api &&
         git remote set-url origin https://gitlab-ci-token:$GITLAB_TOKEN@gitlab.com/jes11sy-group/backend.git &&
         git pull origin main &&
-        echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY &&
-        docker-compose -f deployment/docker-compose.production.yml pull &&
+        docker-compose -f deployment/docker-compose.production.yml build --no-cache &&
         docker-compose -f deployment/docker-compose.production.yml up -d &&
         docker system prune -f &&
         echo '✅ Продакшен деплой завершен'
