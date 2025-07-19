@@ -7,6 +7,7 @@ variables:
   DOCKER_TLS_CERTDIR: "/certs"
   REGISTRY_IMAGE: "registry.gitlab.com/jes11sy-group/backend"
   PRODUCTION_HOST: "176.124.200.32"
+  PRODUCTION_USER: "root"
 
 # Кеширование для ускорения сборки
 cache:
@@ -81,11 +82,10 @@ deploy_production:
   script:
     - echo "🚀 Деплой на продакшен сервер..."
         - ssh $PRODUCTION_USER@$PRODUCTION_HOST "
-        cd ~/backend-api &&
+        cd /home/deployer/backend-api &&
         git remote set-url origin https://gitlab-ci-token:$GITLAB_TOKEN@gitlab.com/jes11sy-group/backend.git &&
         git pull origin main &&
-        find deployment -type f -exec chmod 644 {} + 2>/dev/null || true &&
-        find deployment -type d -exec chmod 755 {} + 2>/dev/null || true &&
+
         echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin &&
         docker-compose -f deployment/docker-compose.production.yml build --no-cache &&
         docker-compose -f deployment/docker-compose.production.yml up -d &&
