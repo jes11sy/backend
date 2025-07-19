@@ -1,0 +1,387 @@
+_format_version: "3.0"
+_transform: true
+
+# Сервисы (backend endpoints)
+services:
+  # Основной backend service
+  - name: backend-service
+    url: http://backend:8000
+    tags:
+      - backend
+      - production
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 3
+
+# Маршруты для продакшена
+routes:
+  # API v1 маршруты
+  - name: api-v1-route
+    service: backend-service
+    hosts:
+      - api.lead-schem.ru
+    paths:
+      - /api/v1
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - OPTIONS
+    strip_path: false
+    preserve_host: true
+    tags:
+      - api-v1
+      - production
+
+  # API v2 маршруты
+  - name: api-v2-route
+    service: backend-service
+    hosts:
+      - api.lead-schem.ru
+    paths:
+      - /api/v2
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - OPTIONS
+    strip_path: false
+    preserve_host: true
+    tags:
+      - api-v2
+      - production
+
+  # Health check (публичный)
+  - name: health-route
+    service: backend-service
+    hosts:
+      - api.lead-schem.ru
+    paths:
+      - /health
+    methods:
+      - GET
+    strip_path: false
+    preserve_host: true
+    tags:
+      - health
+      - public
+
+  # API документация
+  - name: docs-route
+    service: backend-service
+    hosts:
+      - api.lead-schem.ru
+    paths:
+      - /docs
+      - /redoc
+      - /openapi.json
+    methods:
+      - GET
+    strip_path: false
+    preserve_host: true
+    tags:
+      - docs
+      - public
+
+# Потребители API
+consumers:
+  - username: web-frontend
+    custom_id: web-application
+    tags:
+      - frontend
+      - web
+
+  - username: mobile-app
+    custom_id: mobile-application
+    tags:
+      - frontend
+      - mobile
+
+  - username: admin-panel
+    custom_id: admin-application
+    tags:
+      - admin
+      - internal
+
+  - username: external-api
+    custom_id: external-integration
+    tags:
+      - external
+      - api
+
+# JWT учетные данные
+jwt_secrets:
+  - consumer: web-frontend
+    key: web-frontend-key
+    secret: ${WEB_JWT_SECRET}
+    algorithm: HS256
+
+  - consumer: mobile-app
+    key: mobile-app-key
+    secret: ${MOBILE_JWT_SECRET}
+    algorithm: HS256
+
+  - consumer: admin-panel
+    key: admin-panel-key
+    secret: ${ADMIN_JWT_SECRET}
+    algorithm: HS256
+
+  - consumer: external-api
+    key: external-api-key
+    secret: ${EXTERNAL_JWT_SECRET}
+    algorithm: HS256
+
+# API ключи для внешних интеграций
+keyauth_credentials:
+  - consumer: external-api
+    key: ${EXTERNAL_API_KEY}
+
+# Плагины для продакшена
+plugins:
+  # CORS для всех маршрутов
+  - name: cors
+    config:
+      origins:
+        - "https://lead-schem.ru"
+        - "https://www.lead-schem.ru"
+        - "https://admin.lead-schem.ru"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - Authorization
+        - X-Auth-Token
+        - X-API-Key
+        - X-Requested-With
+        - X-CSRF-Token
+      credentials: true
+      max_age: 3600
+      preflight_continue: false
+    tags:
+      - cors
+      - security
+
+  # Rate Limiting (более строгий для продакшена)
+  - name: rate-limiting
+    config:
+      minute: 60         # 60 запросов в минуту
+      hour: 1000        # 1000 запросов в час
+      day: 10000        # 10000 запросов в день
+      policy: redis
+      redis_host: redis
+      redis_port: 6379
+      redis_password: ${REDIS_PASSWORD}
+      fault_tolerant: true
+      hide_client_headers: false
+    tags:
+      - rate-limiting
+      - security
+
+  # JWT Authentication для защищенных маршрутов
+  - name: jwt
+    route: api-v1-route
+    config:
+      secret_is_base64: false
+      key_claim_name: iss
+      claims_to_verify:
+        - exp
+        - iat
+        - iss
+      anonymous: null
+    tags:
+      - auth
+      - jwt
+
+  - name: jwt
+    route: api-v2-route
+    config:
+      secret_is_base64: false
+      key_claim_name: iss
+      claims_to_verify:
+        - exp
+        - iat
+        - iss
+      anonymous: null
+    tags:
+      - auth
+      - jwt
+
+  # Request Size Limiting
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 10  # 10 MB для продакшена
+    tags:
+      - security
+      - limits
+
+  # IP Restriction для admin endpoints
+  - name: ip-restriction
+    route: api-v1-route
+    config:
+      allow:
+        - ${ADMIN_IP_WHITELIST}  # IP адреса администраторов
+      deny: null
+    tags:
+      - security
+      - admin
+
+  # Bot Detection
+  - name: bot-detection
+    config:
+      whitelist:
+        - "GoogleBot"
+        - "BingBot"
+      blacklist:
+        - "BadBot"
+        - "MaliciousBot"
+    tags:
+      - security
+      - bot-protection
+
+  # Request Termination для заблокированных IP
+  - name: request-termination
+    config:
+      status_code: 403
+      message: "Access Denied"
+    tags:
+      - security
+      - termination
+
+  # Response Rate Limiting
+  - name: response-ratelimiting
+    config:
+      limits:
+        video:
+          minute: 5
+        image:
+          minute: 20
+        json:
+          minute: 100
+    tags:
+      - limits
+      - performance
+
+  # Request/Response Transformer
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - "X-API-Version: v1"
+          - "X-Powered-By: Kong Gateway"
+      remove:
+        headers:
+          - "X-Internal-Header"
+    tags:
+      - transformation
+      - headers
+
+  # Prometheus метрики
+  - name: prometheus
+    config:
+      per_consumer: true
+      status_code_metrics: true
+      latency_metrics: true
+      bandwidth_metrics: true
+      upstream_health_metrics: true
+    tags:
+      - monitoring
+      - metrics
+
+  # Zipkin трассировка (опционально)
+  - name: zipkin
+    config:
+      http_endpoint: "http://zipkin:9411/api/v2/spans"
+      sample_ratio: 0.1  # 10% запросов
+      include_credential: true
+    tags:
+      - tracing
+      - monitoring
+
+  # File Log для аудита
+  - name: file-log
+    config:
+      path: /kong/logs/access.log
+      reopen: true
+    tags:
+      - logging
+      - audit
+
+  # HTTP Log для отправки в ELK
+  - name: http-log
+    config:
+      http_endpoint: "http://logstash:5000"
+      method: POST
+      timeout: 10000
+      keepalive: 60000
+    tags:
+      - logging
+      - elk
+
+  # Session плагин для сессий
+  - name: session
+    config:
+      secret: ${SESSION_SECRET}
+      storage: redis
+      redis_host: redis
+      redis_port: 6379
+      redis_password: ${REDIS_PASSWORD}
+      cookie_name: "kong_session"
+      cookie_lifetime: 3600
+      cookie_secure: true
+      cookie_httponly: true
+    tags:
+      - session
+      - security
+
+# Upstreams для load balancing
+upstreams:
+  - name: backend-upstream
+    algorithm: round-robin
+    hash_on: none
+    hash_fallback: none
+    healthchecks:
+      active:
+        type: http
+        http_path: /health
+        healthy:
+          interval: 10
+          http_statuses: [200, 201, 202]
+          successes: 2
+        unhealthy:
+          interval: 10
+          http_statuses: [429, 500, 502, 503, 504]
+          tcp_failures: 3
+          timeouts: 3
+          http_failures: 3
+      passive:
+        type: http
+        healthy:
+          http_statuses: [200, 201, 202, 203, 300, 301, 302, 303, 304, 307, 308]
+          successes: 3
+        unhealthy:
+          http_statuses: [429, 500, 502, 503, 504]
+          tcp_failures: 3
+          timeouts: 3
+          http_failures: 3
+    targets:
+      - target: backend:8000
+        weight: 100
+        health: healthy
+    tags:
+      - backend
+      - upstream 

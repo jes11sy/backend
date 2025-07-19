@@ -1,0 +1,213 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+  PRODUCTION_HOST: "api.lead-schem.ru"
+
+# Кеширование для ускорения сборки
+cache:
+  paths:
+    - .pytest_cache/
+    - __pycache__/
+
+# Тестирование
+test:
+  stage: test
+  image: python:3.11-slim
+  services:
+    - postgres:13
+    - redis:7-alpine
+  variables:
+    POSTGRES_DB: test_db
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_password
+    POSTGRES_HOST: postgres
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+  before_script:
+    - apt-get update -qy
+    - apt-get install -y postgresql-client
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install pytest pytest-asyncio pytest-cov
+  script:
+    - echo "Запуск тестов..."
+    - pytest tests/ -v --cov=app --cov-report=term-missing
+    - echo "✅ Все тесты прошли успешно"
+  coverage: '/TOTAL.*\s+(\d+%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+  only:
+    - main
+    - develop
+    - merge_requests
+
+# Проверка безопасности
+security_scan:
+  stage: test
+  image: python:3.11-slim
+  before_script:
+    - pip install bandit safety
+  script:
+    - echo "🔍 Проверка безопасности кода..."
+    - bandit -r app/ -f json -o bandit-report.json || true
+    - safety check --json --output safety-report.json || true
+    - echo "✅ Проверка безопасности завершена"
+  artifacts:
+    reports:
+      sast: bandit-report.json
+    paths:
+      - safety-report.json
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+
+# Сборка Docker образов
+build:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - echo "🏗️ Сборка Docker образа..."
+    - docker build -t $REGISTRY_IMAGE/backend:$CI_COMMIT_SHA -f deployment/Dockerfile.production .
+    - docker build -t $REGISTRY_IMAGE/backend:latest -f deployment/Dockerfile.production .
+    - echo "📤 Загрузка образа в registry..."
+    - docker push $REGISTRY_IMAGE/backend:$CI_COMMIT_SHA
+    - docker push $REGISTRY_IMAGE/backend:latest
+    - echo "✅ Образ собран и загружен"
+  only:
+    - main
+
+# Деплой на staging
+deploy_staging:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client bash curl
+    - eval $(ssh-agent -s)
+    - echo "$STAGING_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "🚀 Деплой на staging сервер..."
+    - ssh $STAGING_USER@$STAGING_HOST "
+        cd /opt/backend &&
+        docker-compose -f docker-compose.staging.yml pull &&
+        docker-compose -f docker-compose.staging.yml up -d &&
+        docker system prune -f
+      "
+    - echo "✅ Staging деплой завершен"
+  environment:
+    name: staging
+    url: https://staging-api.lead-schem.ru
+  only:
+    - develop
+
+# Деплой на продакшен
+deploy_production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client bash curl
+    - eval $(ssh-agent -s)
+    - echo "$PRODUCTION_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $PRODUCTION_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "🚀 Деплой на продакшен сервер..."
+    - ssh $PRODUCTION_USER@$PRODUCTION_HOST "
+        cd /opt/backend &&
+        echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY &&
+        docker-compose -f docker-compose.production.yml pull &&
+        docker-compose -f docker-compose.production.yml up -d &&
+        docker system prune -f &&
+        echo '✅ Продакшен деплой завершен'
+      "
+    # Проверка health check
+    - sleep 30
+    - curl -f https://api.lead-schem.ru/health || exit 1
+    - echo "🎉 Сервис успешно развернут и работает!"
+  environment:
+    name: production
+    url: https://api.lead-schem.ru
+  when: manual  # Ручной запуск для продакшена
+  only:
+    - main
+
+# Откат в случае проблем
+rollback_production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client bash
+    - eval $(ssh-agent -s)
+    - echo "$PRODUCTION_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $PRODUCTION_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "🔄 Откат к предыдущей версии..."
+    - ssh $PRODUCTION_USER@$PRODUCTION_HOST "
+        cd /opt/backend &&
+        docker-compose -f docker-compose.production.yml down &&
+        docker tag $REGISTRY_IMAGE/backend:previous $REGISTRY_IMAGE/backend:latest &&
+        docker-compose -f docker-compose.production.yml up -d &&
+        echo '✅ Откат завершен'
+      "
+  environment:
+    name: production
+    url: https://api.lead-schem.ru
+  when: manual
+  only:
+    - main
+
+# Уведомления в Telegram
+notify_success:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - |
+      curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+        -H "Content-Type: application/json" \
+        -d "{
+          \"chat_id\": \"$TELEGRAM_CHAT_ID\",
+          \"text\": \"✅ Деплой успешно завершен!\n\n🚀 Commit: $CI_COMMIT_SHA\n📝 Message: $CI_COMMIT_MESSAGE\n🌐 URL: https://api.lead-schem.ru\n⏰ Time: $(date)\",
+          \"parse_mode\": \"HTML\"
+        }"
+  when: on_success
+  only:
+    - main
+
+notify_failure:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - |
+      curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+        -H "Content-Type: application/json" \
+        -d "{
+          \"chat_id\": \"$TELEGRAM_CHAT_ID\",
+          \"text\": \"❌ Ошибка деплоя!\n\n🚀 Commit: $CI_COMMIT_SHA\n📝 Message: $CI_COMMIT_MESSAGE\n🔗 Pipeline: $CI_PIPELINE_URL\n⏰ Time: $(date)\",
+          \"parse_mode\": \"HTML\"
+        }"
+  when: on_failure
+  only:
+    - main 

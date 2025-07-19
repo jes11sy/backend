@@ -1,0 +1,242 @@
+version: '3.8'
+
+services:
+  # Kong API Gateway
+  kong:
+    image: kong:3.4-alpine
+    container_name: kong-production
+    restart: unless-stopped
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: "127.0.0.1:8001"  # Только localhost для безопасности
+      KONG_REAL_IP_HEADER: "X-Forwarded-For"
+      KONG_REAL_IP_RECURSIVE: "on"
+      KONG_TRUSTED_IPS: "0.0.0.0/0"
+    volumes:
+      - ./kong:/kong/declarative
+      - kong_logs:/kong/logs
+    networks:
+      - backend_network
+    depends_on:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kong.rule=Host(`api.lead-schem.ru`)"
+      - "traefik.http.routers.kong.tls=true"
+      - "traefik.http.routers.kong.tls.certresolver=letsencrypt"
+      - "traefik.http.services.kong.loadbalancer.server.port=8000"
+
+  # Backend API
+  backend:
+    image: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHA:-latest}
+    container_name: backend-production
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - POSTGRESQL_HOST=${POSTGRESQL_HOST}
+      - POSTGRESQL_PORT=${POSTGRESQL_PORT}
+      - POSTGRESQL_USER=${POSTGRESQL_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DBNAME=${POSTGRESQL_DBNAME}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - API_DOMAIN=api.lead-schem.ru
+      - CORS_ORIGINS=https://lead-schem.ru,https://www.lead-schem.ru
+    volumes:
+      - backend_logs:/app/logs
+      - backend_media:/app/media
+      - backend_data:/app/data
+    networks:
+      - backend_network
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL - ВНЕШНЯЯ БД (комментарий для справки)
+  # Подключение к внешней базе данных через переменные:
+  # POSTGRESQL_HOST - хост внешней БД
+  # POSTGRESQL_PORT - порт внешней БД  
+  # POSTGRESQL_USER - пользователь БД
+  # POSTGRESQL_PASSWORD - пароль БД
+  # POSTGRESQL_DBNAME - название БД
+
+  # Redis для кеширования
+  redis:
+    image: redis:7-alpine
+    container_name: redis-production
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Traefik как reverse proxy с SSL
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik-production
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_data:/data
+      - ./traefik:/etc/traefik
+    networks:
+      - backend_network
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      - "--global.checknewversion=false"
+      - "--global.sendanonymoususage=false"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.lead-schem.ru`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}"
+
+  # Prometheus для метрик
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-production
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - backend_network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.lead-schem.ru`)"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.tls.certresolver=letsencrypt"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.http.routers.prometheus.middlewares=auth"
+
+  # Grafana для визуализации
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-production
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SERVER_DOMAIN=grafana.lead-schem.ru
+      - GF_SERVER_ROOT_URL=https://grafana.lead-schem.ru
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana_dashboards:/var/lib/grafana/dashboards
+      - ./monitoring/grafana_provisioning:/etc/grafana/provisioning
+    networks:
+      - backend_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.lead-schem.ru`)"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  # Node Exporter для системных метрик
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter-production
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - backend_network
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+
+  # Nginx для статических файлов (опционально)
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-production
+    restart: unless-stopped
+    volumes:
+      - backend_media:/usr/share/nginx/html/media:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - backend_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.static.rule=Host(`static.lead-schem.ru`)"
+      - "traefik.http.routers.static.tls=true"
+      - "traefik.http.routers.static.tls.certresolver=letsencrypt"
+      - "traefik.http.services.static.loadbalancer.server.port=80"
+
+networks:
+  backend_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  traefik_data:
+    driver: local
+  backend_logs:
+    driver: local
+  backend_media:
+    driver: local
+  backend_data:
+    driver: local
+  kong_logs:
+    driver: local 

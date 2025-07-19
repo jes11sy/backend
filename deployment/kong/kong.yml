@@ -1,0 +1,295 @@
+_format_version: "3.0"
+_transform: true
+
+# Сервисы (твои backend endpoints)
+services:
+  # API для заявок
+  - name: requests-service
+    url: http://backend:8000
+    path: /requests
+    tags:
+      - requests
+    
+  # API для пользователей  
+  - name: users-service
+    url: http://backend:8000
+    path: /users
+    tags:
+      - users
+      
+  # API для аутентификации
+  - name: auth-service
+    url: http://backend:8000
+    path: /auth
+    tags:
+      - auth
+      
+  # API для файлов
+  - name: files-service
+    url: http://backend:8000
+    path: /files
+    tags:
+      - files
+      
+  # API для транзакций
+  - name: transactions-service
+    url: http://backend:8000
+    path: /transactions
+    tags:
+      - transactions
+
+  # Health check endpoint
+  - name: health-service
+    url: http://backend:8000
+    path: /health
+    tags:
+      - health
+
+# Маршруты (routes)
+routes:
+  # Маршрут для заявок
+  - name: requests-route
+    service: requests-service
+    paths:
+      - /api/v1/requests
+      - /api/v2/requests
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+    tags:
+      - requests
+
+  # Маршрут для пользователей
+  - name: users-route
+    service: users-service
+    paths:
+      - /api/v1/users
+      - /api/v2/users
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+    tags:
+      - users
+
+  # Маршрут для аутентификации (без ограничений)
+  - name: auth-route
+    service: auth-service
+    paths:
+      - /api/v1/auth
+      - /api/v2/auth
+    methods:
+      - GET
+      - POST
+    tags:
+      - auth
+
+  # Маршрут для файлов
+  - name: files-route
+    service: files-service
+    paths:
+      - /api/v1/files
+      - /api/v2/files
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+    tags:
+      - files
+
+  # Маршрут для транзакций
+  - name: transactions-route
+    service: transactions-service
+    paths:
+      - /api/v1/transactions
+      - /api/v2/transactions
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+    tags:
+      - transactions
+
+  # Health check (публичный)
+  - name: health-route
+    service: health-service
+    paths:
+      - /health
+      - /api/health
+    methods:
+      - GET
+    tags:
+      - health
+
+# Потребители API (consumers)
+consumers:
+  - username: web-app
+    custom_id: web-application
+    tags:
+      - web
+      
+  - username: mobile-app
+    custom_id: mobile-application
+    tags:
+      - mobile
+      
+  - username: admin-panel
+    custom_id: admin-application
+    tags:
+      - admin
+
+# JWT учетные данные для потребителей
+jwt_secrets:
+  - consumer: web-app
+    key: web-app-key
+    secret: your-jwt-secret-key-here
+    algorithm: HS256
+    
+  - consumer: mobile-app
+    key: mobile-app-key
+    secret: your-jwt-secret-key-here
+    algorithm: HS256
+    
+  - consumer: admin-panel
+    key: admin-panel-key
+    secret: your-jwt-secret-key-here
+    algorithm: HS256
+
+# Плагины
+plugins:
+  # Rate Limiting для всех маршрутов
+  - name: rate-limiting
+    config:
+      minute: 100        # 100 запросов в минуту
+      hour: 1000         # 1000 запросов в час
+      policy: local
+      fault_tolerant: true
+      hide_client_headers: false
+    tags:
+      - rate-limiting
+
+  # CORS для веб-приложений
+  - name: cors
+    config:
+      origins:
+        - "http://localhost:3000"
+        - "http://localhost:8080" 
+        - "https://yourdomain.com"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - Authorization
+        - X-Auth-Token
+      credentials: true
+      max_age: 3600
+    tags:
+      - cors
+
+  # JWT Authentication для защищенных маршрутов
+  - name: jwt
+    route: requests-route
+    config:
+      secret_is_base64: false
+      key_claim_name: iss
+      claims_to_verify:
+        - exp
+    tags:
+      - auth
+
+  - name: jwt
+    route: users-route
+    config:
+      secret_is_base64: false
+      key_claim_name: iss
+      claims_to_verify:
+        - exp
+    tags:
+      - auth
+
+  - name: jwt
+    route: files-route
+    config:
+      secret_is_base64: false
+      key_claim_name: iss
+      claims_to_verify:
+        - exp
+    tags:
+      - auth
+
+  - name: jwt
+    route: transactions-route
+    config:
+      secret_is_base64: false
+      key_claim_name: iss
+      claims_to_verify:
+        - exp
+    tags:
+      - auth
+
+  # Request Size Limiting
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 50  # 50 MB максимум
+    tags:
+      - security
+
+  # Response Rate Limiting для защиты от DDoS
+  - name: response-ratelimiting
+    config:
+      limits:
+        video: 
+          minute: 10
+        audio:
+          minute: 20
+    tags:
+      - ddos-protection
+
+  # Prometheus метрики
+  - name: prometheus
+    config:
+      per_consumer: true
+      status_code_metrics: true
+      latency_metrics: true
+      bandwidth_metrics: true
+    tags:
+      - monitoring
+
+  # Request/Response логирование
+  - name: file-log
+    config:
+      path: /kong/logs/access.log
+      reopen: true
+    tags:
+      - logging
+
+# Upstreams для load balancing (если будет несколько backend инстансов)
+upstreams:
+  - name: backend-upstream
+    algorithm: round-robin
+    healthchecks:
+      active:
+        http_path: /health
+        healthy:
+          interval: 5
+          successes: 2
+        unhealthy:
+          interval: 5
+          http_failures: 3
+    targets:
+      - target: backend:8000
+        weight: 100 
