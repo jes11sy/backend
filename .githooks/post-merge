@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Исправление прав файлов после git pull
+echo "🔧 Fixing file permissions after git pull..."
+
+# Убедиться что текущий пользователь владеет всеми файлами
+if [ -w . ]; then
+    find . -type f -name "*.yml" -o -name "*.yaml" -o -name "*.json" -o -name "*.conf" | xargs chmod 644 2>/dev/null || true
+    find . -type d | xargs chmod 755 2>/dev/null || true
+    echo "✅ File permissions fixed"
+else
+    echo "⚠️ Cannot fix permissions - insufficient rights"
+fi 
