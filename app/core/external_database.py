@@ -6,7 +6,7 @@ import os
 import ssl
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import QueuePool
+# QueuePool не нужен для async движка
 from .config import settings
 
 
@@ -67,8 +67,8 @@ def create_external_db_engine():
     # Создание движка с оптимизированными настройками
     engine = create_async_engine(
         database_url,
-        # Connection Pool настройки
-        poolclass=QueuePool,
+        # Connection Pool настройки (для async используем AsyncAdaptedQueuePool)
+        # poolclass не указываем - по умолчанию используется правильный для async
         pool_size=int(os.getenv('DB_POOL_SIZE', settings.DB_POOL_SIZE)),
         max_overflow=int(os.getenv('DB_MAX_OVERFLOW', settings.DB_MAX_OVERFLOW)),
         pool_timeout=int(os.getenv('DB_POOL_TIMEOUT', settings.DB_POOL_TIMEOUT)),
@@ -115,7 +115,8 @@ async def check_external_db_connection():
         
         async with engine.begin() as conn:
             # Проверочный запрос
-            result = await conn.execute("SELECT 1 as test")
+            from sqlalchemy import text
+            result = await conn.execute(text("SELECT 1 as test"))
             row = result.fetchone()
             
             if row and row[0] == 1:
@@ -141,19 +142,21 @@ async def get_external_db_info():
         engine = create_external_db_engine()
         
         async with engine.begin() as conn:
+            from sqlalchemy import text
+            
             # Версия PostgreSQL
-            version_result = await conn.execute("SELECT version()")
+            version_result = await conn.execute(text("SELECT version()"))
             version = version_result.fetchone()[0]
             
             # Размер БД
             size_result = await conn.execute(
-                f"SELECT pg_size_pretty(pg_database_size('{settings.POSTGRESQL_DBNAME}'))"
+                text(f"SELECT pg_size_pretty(pg_database_size('{settings.POSTGRESQL_DBNAME}'))")
             )
             db_size = size_result.fetchone()[0]
             
             # Количество подключений
             connections_result = await conn.execute(
-                "SELECT count(*) FROM pg_stat_activity WHERE state = 'active'"
+                text("SELECT count(*) FROM pg_stat_activity WHERE state = 'active'")
             )
             active_connections = connections_result.fetchone()[0]
             
