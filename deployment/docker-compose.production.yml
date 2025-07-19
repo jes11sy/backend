@@ -226,8 +226,6 @@ networks:
 volumes:
   redis_data:
     driver: local
-  prometheus_data:
-    driver: local
   grafana_data:
     driver: local
   traefik_data:
