@@ -1,0 +1,76 @@
+# =====================================
+# КОМАНДЫ ДЛЯ НАСТРОЙКИ GITLAB REMOTE
+# =====================================
+
+# 1. ✅ ГОТОВО - Репозиторий подключен:
+git remote add origin https://gitlab.com/jes11sy-group/backend.git
+
+# 2. ✅ ГОТОВО - Код отправлен:
+git push -u origin main
+
+# =====================================
+# НАСТРОЙКА CI/CD ПЕРЕМЕННЫХ В GITLAB
+# =====================================
+
+# Зайди в GitLab: Settings > CI/CD > Variables
+# Добавь следующие переменные:
+
+## БАЗОВЫЕ ПЕРЕМЕННЫЕ БД
+POSTGRESQL_HOST=74ac89b6f8cc981b84f28f3b.twc1.net
+POSTGRESQL_PORT=5432
+POSTGRESQL_USER=gen_user
+POSTGRESQL_PASSWORD=Jple$?}bl!hCd3
+POSTGRESQL_DBNAME=default_db
+
+## СЕКРЕТНЫЕ КЛЮЧИ
+SECRET_KEY=iDv3PkU-F2ABvGgKunho0r9gtVsn4qo4ZnFAzgN5u-schOviXOzAQKA9QiOUyidFW6zRYlHIFTuiV1ezmdXqyQ
+JWT_SECRET_KEY=LcVGNtMUnwXp6YGq-RTdrwEObRvOa5hIvo0W6Ts3iJKjiQ3zpMA0YVNfQtmRHFslx1rq0SeNhfdZqyeRlh6_KQ
+SESSION_SECRET=SM6Y59QGmtMf3TQzxHtIQCjzrO3DHiS-E186FAEDFqc
+
+## JWT СЕКРЕТЫ ДЛЯ KONG
+WEB_JWT_SECRET=BRzYNlKFP3P_8hjlLrwzWRowaAzo-At1Ue85zxOvb1g
+MOBILE_JWT_SECRET=vABcsAYqqmH4HUWRp-ShKgJuFVwZjHPzMgUx7ud0Mxo
+ADMIN_JWT_SECRET=YhPvJ9xwjBEQcKdZrkuGv2LlGfN7cZgeXHRlOcfBFHU
+EXTERNAL_JWT_SECRET=PRDmI72FoPHy5zdfmKwo_i-A5jabyWm9HBbCIm-_bnU
+
+## API КЛЮЧИ
+EXTERNAL_API_KEY=lsk_w5_uM-HUYQRZAJ1_BWIrDNTmkXUwmqBozSYlmeFqXCU
+
+## REDIS
+REDIS_PASSWORD=RedisPass2024LeadSchem!
+
+## SSL/MONITORING
+LETSENCRYPT_EMAIL=defouz03@gmail.com
+CLOUDFLARE_EMAIL=defouz03@gmail.com
+CLOUDFLARE_DNS_API_TOKEN=CHANGE_ME_CLOUDFLARE_TOKEN_HERE
+GRAFANA_ADMIN_PASSWORD=GrafanaAdmin2024LeadSchem!
+
+## TELEGRAM
+TELEGRAM_BOT_TOKEN=8032155601:AAG9myXmM3tO12LRFsX9T64wVIEdi6pexi8
+TELEGRAM_CHAT_ID=-1002824541721
+
+## ДЕПЛОЙ
+PRODUCTION_HOST=api.lead-schem.ru
+PRODUCTION_USER=deployer
+PRODUCTION_SSH_PRIVATE_KEY=[Твой SSH ключ для сервера]
+
+# =====================================
+# ВАЖНО! НАСТРОЙКИ БЕЗОПАСНОСТИ
+# =====================================
+
+# Все переменные должны быть:
+# ✅ Protected = true (только в защищенных ветках)
+# ✅ Masked = true (скрыты в логах)
+
+# =====================================
+# СОЗДАНИЕ SSH КЛЮЧА ДЛЯ ДЕПЛОЯ
+# =====================================
+
+# Генерация SSH ключа:
+ssh-keygen -t ed25519 -C "deploy@api.lead-schem.ru" -f gitlab_deploy_key
+
+# Публичный ключ добавь на сервер:
+# ssh-copy-id -i gitlab_deploy_key.pub deployer@api.lead-schem.ru
+
+# Приватный ключ (содержимое gitlab_deploy_key) добавь в GitLab CI/CD Variables как:
+# PRODUCTION_SSH_PRIVATE_KEY 
