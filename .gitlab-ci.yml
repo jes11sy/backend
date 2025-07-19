@@ -81,10 +81,42 @@ deploy_production:
     - ssh-keyscan -H $PRODUCTION_HOST >> ~/.ssh/known_hosts
   script:
     - echo "🚀 Деплой на продакшен сервер..."
-        - ssh $PRODUCTION_USER@$PRODUCTION_HOST "
+    - ssh $PRODUCTION_USER@$PRODUCTION_HOST "
         cd /home/deployer/backend-api &&
         git remote set-url origin https://gitlab-ci-token:$GITLAB_TOKEN@gitlab.com/jes11sy-group/backend.git &&
         git pull origin main &&
+
+        echo '📝 Создание .env файла...' &&
+        cat > .env << EOF
+# Database Configuration
+POSTGRESQL_HOST=${POSTGRESQL_HOST}
+POSTGRESQL_PORT=${POSTGRESQL_PORT}
+POSTGRESQL_USER=${POSTGRESQL_USER}
+POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+POSTGRESQL_DBNAME=${POSTGRESQL_DBNAME}
+
+# Security
+SECRET_KEY=${SECRET_KEY}
+JWT_SECRET_KEY=${JWT_SECRET_KEY}
+
+# Redis
+REDIS_PASSWORD=${REDIS_PASSWORD}
+
+# SSL and Domain
+LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+
+# Traefik
+TRAEFIK_AUTH=${TRAEFIK_AUTH}
+
+# Monitoring
+GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+
+# Environment
+ENVIRONMENT=production
+DEBUG=false
+EOF
 
         echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin &&
         docker-compose -f deployment/docker-compose.production.yml build --no-cache &&
