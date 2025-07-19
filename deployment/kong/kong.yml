@@ -44,6 +44,19 @@ services:
     path: /health
     tags:
       - health
+      
+  # API Documentation
+  - name: docs-service
+    url: http://backend:8000
+    path: /docs
+    tags:
+      - docs
+      
+  # Root service (для всех остальных путей)
+  - name: root-service
+    url: http://backend:8000
+    tags:
+      - root
 
 # Маршруты (routes)
 routes:
@@ -125,6 +138,32 @@ routes:
       - GET
     tags:
       - health
+      
+  # API Documentation (публичный)
+  - name: docs-route
+    service: docs-service
+    paths:
+      - /docs
+      - /redoc
+      - /openapi.json
+    methods:
+      - GET
+    tags:
+      - docs
+      
+  # Root route (для всех остальных путей)
+  - name: root-route
+    service: root-service
+    paths:
+      - /
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    tags:
+      - root
 
 # Потребители API (consumers)
 consumers:
