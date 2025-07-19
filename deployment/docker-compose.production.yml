@@ -142,7 +142,7 @@ services:
     container_name: prometheus-production
     restart: unless-stopped
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus_config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     networks:
       - backend_network
