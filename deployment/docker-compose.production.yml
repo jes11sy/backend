@@ -173,8 +173,6 @@ services:
       - GF_INSTALL_PLUGINS=grafana-piechart-panel
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana_dashboards:/var/lib/grafana/dashboards
-      - ./monitoring/grafana_provisioning:/etc/grafana/provisioning
     networks:
       - backend_network
     labels:
