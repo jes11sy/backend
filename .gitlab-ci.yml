@@ -84,6 +84,7 @@ deploy_production:
         cd ~/backend-api &&
         git remote set-url origin https://gitlab-ci-token:$GITLAB_TOKEN@gitlab.com/jes11sy-group/backend.git &&
         git pull origin main &&
+        echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin &&
         docker-compose -f deployment/docker-compose.production.yml build --no-cache &&
         docker-compose -f deployment/docker-compose.production.yml up -d &&
         docker system prune -f &&
