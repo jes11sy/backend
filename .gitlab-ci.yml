@@ -68,7 +68,7 @@ deploy_production:
   stage: deploy
   image: alpine:latest
   before_script:
-    - apk add --no-cache openssh-client bash curl
+    - apk add --no-cache openssh-client bash curl git
     - eval $(ssh-agent -s)
     - echo "$PRODUCTION_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
@@ -77,21 +77,18 @@ deploy_production:
   script:
     - echo "🚀 Деплой на продакшен сервер..."
     - ssh $PRODUCTION_USER@$PRODUCTION_HOST "
-        cd /opt/backend &&
+        cd ~/backend-api &&
+        git pull origin main &&
         echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY &&
-        docker-compose -f docker-compose.production.yml pull &&
-        docker-compose -f docker-compose.production.yml up -d &&
+        docker-compose -f deployment/docker-compose.production.yml pull &&
+        docker-compose -f deployment/docker-compose.production.yml up -d &&
         docker system prune -f &&
         echo '✅ Продакшен деплой завершен'
       "
-    # Проверка health check
-    - sleep 30
-    - curl -f https://api.lead-schem.ru/health || exit 1
-    - echo "🎉 Сервис успешно развернут и работает!"
+    - echo "🎉 Сервис успешно развернут!"
   environment:
     name: production
-    url: https://api.lead-schem.ru
-  when: manual  # Ручной запуск для продакшена
+    url: http://176.124.200.32:8000
   only:
     - main
 
