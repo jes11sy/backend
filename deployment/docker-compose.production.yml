@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Kong API Gateway
   kong:
-    image: kong:3.4-alpine
+    image: kong:3.7
     container_name: kong-production
     restart: unless-stopped
     environment:
