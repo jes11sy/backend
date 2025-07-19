@@ -44,7 +44,7 @@ deploy_staging:
   before_script:
     - apk add --no-cache openssh-client bash curl
     - eval $(ssh-agent -s)
-    - printf "%s\n" "$STAGING_SSH_PRIVATE_KEY" | tr -d '\r' > /tmp/ssh_key
+    - echo "$STAGING_SSH_PRIVATE_KEY" > /tmp/ssh_key
     - chmod 600 /tmp/ssh_key
     - ssh-add /tmp/ssh_key
     - mkdir -p ~/.ssh
@@ -72,7 +72,7 @@ deploy_production:
   before_script:
     - apk add --no-cache openssh-client bash curl git
     - eval $(ssh-agent -s)
-    - printf "%s\n" "$PRODUCTION_SSH_PRIVATE_KEY" | tr -d '\r' > /tmp/ssh_key
+    - echo "$PRODUCTION_SSH_PRIVATE_KEY" > /tmp/ssh_key
     - chmod 600 /tmp/ssh_key
     - ssh-add /tmp/ssh_key
     - mkdir -p ~/.ssh
@@ -105,7 +105,7 @@ rollback_production:
   before_script:
     - apk add --no-cache openssh-client bash
     - eval $(ssh-agent -s)
-    - printf "%s\n" "$PRODUCTION_SSH_PRIVATE_KEY" | tr -d '\r' > /tmp/ssh_key
+    - echo "$PRODUCTION_SSH_PRIVATE_KEY" > /tmp/ssh_key
     - chmod 600 /tmp/ssh_key
     - ssh-add /tmp/ssh_key
     - mkdir -p ~/.ssh
