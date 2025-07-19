@@ -119,6 +119,34 @@ deploy_production:
       DEBUG=false
       EOF
 
+        echo '📝 Создание конфигурации Prometheus...' &&
+        mkdir -p deployment/monitoring/prometheus_config &&
+        cat > deployment/monitoring/prometheus_config/prometheus.yml << 'PROMETHEUS_EOF'
+      global:
+        scrape_interval: 15s
+        evaluation_interval: 15s
+
+      rule_files:
+
+      scrape_configs:
+        - job_name: 'prometheus'
+          static_configs:
+            - targets: ['localhost:9090']
+
+        - job_name: 'node-exporter'
+          static_configs:
+            - targets: ['node-exporter:9100']
+
+        - job_name: 'backend'
+          static_configs:
+            - targets: ['backend:8000']
+          metrics_path: '/metrics'
+
+        - job_name: 'traefik'
+          static_configs:
+            - targets: ['traefik:8080']
+      PROMETHEUS_EOF
+
         echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin &&
         docker-compose -f deployment/docker-compose.production.yml build --no-cache &&
         docker-compose -f deployment/docker-compose.production.yml up -d &&
