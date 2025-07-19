@@ -18,6 +18,7 @@ config/.env*
 *.pfx
 ssl/
 secrets/
+gitlab_deploy_key*
 
 # ===============================
 # PYTHON
