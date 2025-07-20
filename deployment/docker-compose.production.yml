@@ -58,7 +58,7 @@ services:
     image: redis:7-alpine
     container_name: redis-production
     restart: unless-stopped
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server
     volumes:
       - redis_data:/data
     networks:
@@ -144,17 +144,3 @@ services:
       - "traefik.http.routers.prometheus.tls.certresolver=letsencrypt"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
       - "traefik.http.routers.prometheus.middlewares=auth"
-
-networks:
-  backend_network:
-    driver: bridge
-
-volumes:
-  redis_data:
-    driver: local
-  traefik_data:
-    driver: local
-  backend_logs:
-    driver: local 
-  prometheus_data:
-    driver: local 
