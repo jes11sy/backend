@@ -20,8 +20,13 @@ services:
       - POSTGRESQL_PORT
       - POSTGRESQL_USER
       - REDIS_PASSWORD
+      - RAMBLER_IMAP_USERNAME
+      - RAMBLER_IMAP_PASSWORD
+      - RAMBLER_IMAP_HOST
+      - RAMBLER_IMAP_PORT
+      - RAMBLER_IMAP_USE_SSL
+      - RECORDINGS_CHECK_INTERVAL
       - ENVIRONMENT=production
-      # остальные переменные, если нужны
     volumes:
       - backend_logs:/app/logs
       - ../media:/app/media
