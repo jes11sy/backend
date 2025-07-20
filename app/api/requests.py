@@ -1,6 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
+import logging
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from ..core.database import get_db
@@ -465,24 +466,40 @@ async def upload_bso_file(request_id: int, file: UploadFile = File(...), db: Asy
     allowed = {".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"}
     if ext not in allowed:
         raise HTTPException(status_code=400, detail="Недопустимый тип файла")
-    # Определяем путь
-    current = os.path.abspath(os.path.dirname(__file__))
-    while not os.path.basename(current).lower() == "project" and current != os.path.dirname(current):
-        current = os.path.dirname(current)
-    project_root = current
-    upload_dir = os.path.join(project_root, "media", "zayvka", "bso")
-    os.makedirs(upload_dir, exist_ok=True)
-    filename = f"{uuid4()}{ext}"
-    file_path = os.path.join(upload_dir, filename)
-    content = await file.read()
-    with open(file_path, "wb") as f:
-        f.write(content)
-    rel_path = os.path.relpath(file_path, project_root)
-    # Обновляем заявку
-    from ..core.schemas import RequestUpdate
-    from ..core.crud import update_request
-    await update_request(db, request_id, RequestUpdate(bso_file_path=rel_path))
-    return {"file_path": rel_path}
+    # Определяем путь относительно корня проекта
+    try:
+        # Сначала пробуем найти через структуру приложения
+        current = os.path.abspath(os.path.dirname(__file__))
+        while not os.path.basename(current).lower() in ["project", "backend"] and current != os.path.dirname(current):
+            current = os.path.dirname(current)
+        project_root = current
+        upload_dir = os.path.join(project_root, "media", "zayvka", "bso")
+        
+        # Если папка media не существует, создаем относительно текущей директории
+        if not os.path.exists(os.path.join(project_root, "media")):
+            project_root = os.getcwd()
+            upload_dir = os.path.join(project_root, "media", "zayvka", "bso")
+    except Exception as e:
+        # Fallback - используем текущую рабочую директорию
+        project_root = os.getcwd()
+        upload_dir = os.path.join(project_root, "media", "zayvka", "bso")
+    try:
+        os.makedirs(upload_dir, exist_ok=True)
+        filename = f"{uuid4()}{ext}"
+        file_path = os.path.join(upload_dir, filename)
+        content = await file.read()
+        with open(file_path, "wb") as f:
+            f.write(content)
+        rel_path = os.path.relpath(file_path, project_root)
+        # Обновляем заявку
+        from ..core.schemas import RequestUpdate
+        from ..core.crud import update_request
+        await update_request(db, request_id, RequestUpdate(bso_file_path=rel_path))
+        logging.info(f"BSO uploaded: {rel_path} for request {request_id}")
+        return {"file_path": rel_path}
+    except Exception as e:
+        logging.error(f"Error uploading BSO file: {e}")
+        raise HTTPException(status_code=500, detail=f"Ошибка загрузки файла: {str(e)}")
 
 @router.post("/{request_id}/upload-expense/")
 async def upload_expense_file(request_id: int, file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
@@ -493,11 +510,22 @@ async def upload_expense_file(request_id: int, file: UploadFile = File(...), db:
     allowed = {".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"}
     if ext not in allowed:
         raise HTTPException(status_code=400, detail="Недопустимый тип файла")
-    current = os.path.abspath(os.path.dirname(__file__))
-    while not os.path.basename(current).lower() == "project" and current != os.path.dirname(current):
-        current = os.path.dirname(current)
-    project_root = current
-    upload_dir = os.path.join(project_root, "media", "zayvka", "rashod")
+    try:
+        # Сначала пробуем найти через структуру приложения
+        current = os.path.abspath(os.path.dirname(__file__))
+        while not os.path.basename(current).lower() in ["project", "backend"] and current != os.path.dirname(current):
+            current = os.path.dirname(current)
+        project_root = current
+        upload_dir = os.path.join(project_root, "media", "zayvka", "rashod")
+        
+        # Если папка media не существует, создаем относительно текущей директории
+        if not os.path.exists(os.path.join(project_root, "media")):
+            project_root = os.getcwd()
+            upload_dir = os.path.join(project_root, "media", "zayvka", "rashod")
+    except Exception as e:
+        # Fallback - используем текущую рабочую директорию
+        project_root = os.getcwd()
+        upload_dir = os.path.join(project_root, "media", "zayvka", "rashod")
     os.makedirs(upload_dir, exist_ok=True)
     filename = f"{uuid4()}{ext}"
     file_path = os.path.join(upload_dir, filename)
@@ -519,11 +547,22 @@ async def upload_recording_file(request_id: int, file: UploadFile = File(...), d
     allowed = {".mp3", ".wav", ".ogg", ".m4a", ".amr"}
     if ext not in allowed:
         raise HTTPException(status_code=400, detail="Недопустимый тип файла")
-    current = os.path.abspath(os.path.dirname(__file__))
-    while not os.path.basename(current).lower() == "project" and current != os.path.dirname(current):
-        current = os.path.dirname(current)
-    project_root = current
-    upload_dir = os.path.join(project_root, "media", "zayvka", "zapis")
+    try:
+        # Сначала пробуем найти через структуру приложения
+        current = os.path.abspath(os.path.dirname(__file__))
+        while not os.path.basename(current).lower() in ["project", "backend"] and current != os.path.dirname(current):
+            current = os.path.dirname(current)
+        project_root = current
+        upload_dir = os.path.join(project_root, "media", "zayvka", "zapis")
+        
+        # Если папка media не существует, создаем относительно текущей директории
+        if not os.path.exists(os.path.join(project_root, "media")):
+            project_root = os.getcwd()
+            upload_dir = os.path.join(project_root, "media", "zayvka", "zapis")
+    except Exception as e:
+        # Fallback - используем текущую рабочую директорию
+        project_root = os.getcwd()
+        upload_dir = os.path.join(project_root, "media", "zayvka", "zapis")
     os.makedirs(upload_dir, exist_ok=True)
     filename = f"{uuid4()}{ext}"
     file_path = os.path.join(upload_dir, filename)
