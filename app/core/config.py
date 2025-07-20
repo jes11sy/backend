@@ -111,13 +111,9 @@ class Settings(BaseSettings):
     
     @property
     def RECORDINGS_DOWNLOAD_PATH(self) -> str:
-        """Получение абсолютного пути для сохранения записей"""
-        # Находим корень проекта
-        current = os.path.abspath(os.path.dirname(__file__))
-        while not os.path.basename(current).lower() == "project" and current != os.path.dirname(current):
-            current = os.path.dirname(current)
-        project_root = current
-        return os.path.join(project_root, "media", "zayvka", "zapis")
+        """Получение пути для сохранения записей"""
+        # Используем относительный путь от корня приложения
+        return os.path.join("media", "zayvka", "zapis")
     
     # CORS settings
     ALLOWED_ORIGINS: str = ""
