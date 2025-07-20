@@ -8,11 +8,20 @@ services:
     restart: unless-stopped
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     environment:
+      - SECRET_KEY
+      - JWT_SECRET_KEY
+      - LETSENCRYPT_EMAIL
+      - CLOUDFLARE_EMAIL
+      - CLOUDFLARE_DNS_API_TOKEN
+      - GRAFANA_ADMIN_PASSWORD
+      - POSTGRESQL_DBNAME
+      - POSTGRESQL_HOST
+      - POSTGRESQL_PASSWORD
+      - POSTGRESQL_PORT
+      - POSTGRESQL_USER
+      - REDIS_PASSWORD
       - ENVIRONMENT=production
-      - DATABASE_URL=postgresql://${POSTGRESQL_USER}:${POSTGRESQL_PASSWORD}@${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DBNAME}
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      # остальные переменные, если нужны
     volumes:
       - backend_logs:/app/logs
       - ../media:/app/media
