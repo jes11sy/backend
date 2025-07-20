@@ -148,3 +148,21 @@ services:
 networks:
   backend_network:
     driver: bridge
+
+volumes:
+  backend_logs:
+    driver: local
+  backend_media:
+    driver: local
+  backend_data:
+    driver: local
+  redis_data:
+    driver: local
+  traefik_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  kong_logs:
+    driver: local
