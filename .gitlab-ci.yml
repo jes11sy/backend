@@ -114,6 +114,9 @@ deploy_production:
       # Monitoring
       GRAFANA_ADMIN_PASSWORD="${GRAFANA_ADMIN_PASSWORD}"
 
+      # CORS Configuration
+      CORS_ORIGINS="${CORS_ORIGINS}"
+
       # Environment
       ENVIRONMENT="production"
       DEBUG="false"

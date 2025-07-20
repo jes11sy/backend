@@ -121,12 +121,16 @@ class Settings(BaseSettings):
     
     # CORS settings
     ALLOWED_ORIGINS: str = ""
+    CORS_ORIGINS: str = ""
     
     @property
     def get_allowed_origins(self) -> List[str]:
         """Получить разрешенные origins для CORS"""
-        if self.ALLOWED_ORIGINS:
-            return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
+        # Приоритет: CORS_ORIGINS -> ALLOWED_ORIGINS -> defaults
+        origins_str = self.CORS_ORIGINS or self.ALLOWED_ORIGINS
+        
+        if origins_str:
+            return [origin.strip() for origin in origins_str.split(",")]
         
         # Для разработки разрешаем все localhost origins
         if self.ENVIRONMENT == "development":
