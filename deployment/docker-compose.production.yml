@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Основной Backend сервис
   backend:
@@ -105,6 +103,34 @@ services:
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}"
 
+  # Nginx для статических файлов
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-production
+    restart: unless-stopped
+    volumes:
+      - ../media:/usr/share/nginx/html/media:ro
+    networks:
+      - backend_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.static.rule=Host(`api.lead-schem.ru`) && PathPrefix(`/media`)"
+      - "traefik.http.routers.static.tls=true"
+      - "traefik.http.routers.static.tls.certresolver=letsencrypt"
+      - "traefik.http.services.static.loadbalancer.server.port=80"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-production
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - backend_network
+
 networks:
   backend_network:
     driver: bridge
@@ -115,4 +141,6 @@ volumes:
   traefik_data:
     driver: local
   backend_logs:
+    driver: local 
+  prometheus_data:
     driver: local 
