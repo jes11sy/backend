@@ -466,30 +466,18 @@ async def upload_bso_file(request_id: int, file: UploadFile = File(...), db: Asy
     allowed = {".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"}
     if ext not in allowed:
         raise HTTPException(status_code=400, detail="Недопустимый тип файла")
-    # Всегда используем текущую рабочую директорию для надежности
-    project_root = os.getcwd()
-    upload_dir = os.path.join(project_root, "media", "zayvka", "bso")
-    logging.info(f"BSO upload directory: {upload_dir}")
-    try:
-        # Проверяем и создаем директории с подробным логированием
-        logging.info(f"Creating directory: {upload_dir}")
-        os.makedirs(upload_dir, exist_ok=True)
-        logging.info(f"Directory created successfully: {upload_dir}")
-        filename = f"{uuid4()}{ext}"
-        file_path = os.path.join(upload_dir, filename)
-        content = await file.read()
-        with open(file_path, "wb") as f:
-            f.write(content)
-        rel_path = os.path.relpath(file_path, project_root)
-        # Обновляем заявку
-        from ..core.schemas import RequestUpdate
-        from ..core.crud import update_request
-        await update_request(db, request_id, RequestUpdate(bso_file_path=rel_path))
-        logging.info(f"BSO uploaded: {rel_path} for request {request_id}")
-        return {"file_path": rel_path}
-    except Exception as e:
-        logging.error(f"Error uploading BSO file: {e}")
-        raise HTTPException(status_code=500, detail=f"Ошибка загрузки файла: {str(e)}")
+    upload_dir = os.path.join("media", "zayvka", "bso")
+    os.makedirs(upload_dir, exist_ok=True)
+    filename = f"{uuid4()}{ext}"
+    file_path = os.path.join(upload_dir, filename)
+    content = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+    # Обновляем заявку
+    from ..core.schemas import RequestUpdate
+    from ..core.crud import update_request
+    await update_request(db, request_id, RequestUpdate(bso_file_path=file_path))
+    return {"file_path": file_path}
 
 @router.post("/{request_id}/upload-expense/")
 async def upload_expense_file(request_id: int, file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
@@ -500,21 +488,17 @@ async def upload_expense_file(request_id: int, file: UploadFile = File(...), db:
     allowed = {".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"}
     if ext not in allowed:
         raise HTTPException(status_code=400, detail="Недопустимый тип файла")
-    # Всегда используем текущую рабочую директорию для надежности
-    project_root = os.getcwd()
-    upload_dir = os.path.join(project_root, "media", "zayvka", "rashod")
-    logging.info(f"Expense upload directory: {upload_dir}")
+    upload_dir = os.path.join("media", "zayvka", "rashod")
     os.makedirs(upload_dir, exist_ok=True)
     filename = f"{uuid4()}{ext}"
     file_path = os.path.join(upload_dir, filename)
     content = await file.read()
     with open(file_path, "wb") as f:
         f.write(content)
-    rel_path = os.path.relpath(file_path, project_root)
     from ..core.schemas import RequestUpdate
     from ..core.crud import update_request
-    await update_request(db, request_id, RequestUpdate(expense_file_path=rel_path))
-    return {"file_path": rel_path}
+    await update_request(db, request_id, RequestUpdate(expense_file_path=file_path))
+    return {"file_path": file_path}
 
 @router.post("/{request_id}/upload-recording/")
 async def upload_recording_file(request_id: int, file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
@@ -525,18 +509,14 @@ async def upload_recording_file(request_id: int, file: UploadFile = File(...), d
     allowed = {".mp3", ".wav", ".ogg", ".m4a", ".amr"}
     if ext not in allowed:
         raise HTTPException(status_code=400, detail="Недопустимый тип файла")
-    # Всегда используем текущую рабочую директорию для надежности
-    project_root = os.getcwd()
-    upload_dir = os.path.join(project_root, "media", "zayvka", "zapis")
-    logging.info(f"Recording upload directory: {upload_dir}")
+    upload_dir = os.path.join("media", "zayvka", "zapis")
     os.makedirs(upload_dir, exist_ok=True)
     filename = f"{uuid4()}{ext}"
     file_path = os.path.join(upload_dir, filename)
     content = await file.read()
     with open(file_path, "wb") as f:
         f.write(content)
-    rel_path = os.path.relpath(file_path, project_root)
     from ..core.schemas import RequestUpdate
     from ..core.crud import update_request
-    await update_request(db, request_id, RequestUpdate(recording_file_path=rel_path))
-    return {"file_path": rel_path}
+    await update_request(db, request_id, RequestUpdate(recording_file_path=file_path))
+    return {"file_path": file_path}

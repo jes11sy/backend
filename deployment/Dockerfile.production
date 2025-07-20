@@ -48,9 +48,10 @@ WORKDIR /app
 # Копирование кода приложения
 COPY --chown=appuser:appuser . .
 
-# Создание необходимых директорий
-RUN mkdir -p logs media data /tmp/uploads \
-    && chown -R appuser:appuser logs media data /tmp/uploads
+# Создание необходимых директорий включая структуру media
+RUN mkdir -p logs media/zayvka/bso media/zayvka/rashod media/zayvka/zapis media/gorod/rashod data /tmp/uploads \
+    && chown -R appuser:appuser logs media data /tmp/uploads \
+    && chmod -R 755 media
 
 # Переключение на непривилегированного пользователя
 USER appuser
