@@ -204,7 +204,7 @@ app = FastAPI(
 # ВКЛЮЧАЕМ CORS MIDDLEWARE ПЕРВЫМ!
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.get_allowed_origins,
+    allow_origins=["http://localhost:3000", "https://lead-schem.ru", "https://www.lead-schem.ru"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
