@@ -520,3 +520,4 @@ async def upload_recording_file(request_id: int, file: UploadFile = File(...), d
     from ..core.crud import update_request
     await update_request(db, request_id, RequestUpdate(recording_file_path=file_path))
     return {"file_path": file_path}
+
