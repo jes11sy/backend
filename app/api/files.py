@@ -17,15 +17,8 @@ from ..utils.file_security import (
 
 router = APIRouter()
 
-# PROJECT_ROOT = путь до папки 'project'
-PROJECT_ROOT = os.getenv("PROJECT_ROOT")
-if not PROJECT_ROOT:
-    current = os.path.abspath(os.path.dirname(__file__))
-    while not os.path.basename(current).lower() == "project" and current != os.path.dirname(current):
-        current = os.path.dirname(current)
-    PROJECT_ROOT = current
-
-UPLOAD_DIR = os.path.join(PROJECT_ROOT, "media", "gorod", "rashod")
+# Используем относительный путь от корня приложения
+UPLOAD_DIR = os.path.join("media", "gorod", "rashod")
 
 # Расширенная валидация файлов
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"}
@@ -136,8 +129,7 @@ async def upload_expense_receipt(
         logging.info(f"Файл загружен пользователем {current_user.login}: {file_path}, размер: {len(content)} байт")
         
         # Возвращаем относительный путь
-        rel_path = os.path.relpath(file_path, PROJECT_ROOT)
-        return JSONResponse({"file_path": rel_path})
+        return JSONResponse({"file_path": file_path})
         
     except HTTPException:
         raise

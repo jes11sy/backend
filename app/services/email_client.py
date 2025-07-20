@@ -187,11 +187,8 @@ class RamblerEmailClient:
             download_path = settings.RECORDINGS_DOWNLOAD_PATH
             os.makedirs(download_path, exist_ok=True)
             
-            # Находим корень проекта для правильного вычисления относительного пути
-            current = os.path.abspath(os.path.dirname(__file__))
-            while not os.path.basename(current).lower() == "project" and current != os.path.dirname(current):
-                current = os.path.dirname(current)
-            project_root = current
+            # Используем текущую рабочую директорию как корень проекта
+            project_root = os.getcwd()
             
             # Ищем письма
             message_ids = self.search_emails(days_back)

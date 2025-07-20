@@ -20,9 +20,8 @@ import logging
 
 router = APIRouter(prefix="/secure-files", tags=["secure-files"])
 
-# Базовая директория для медиа файлов
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-MEDIA_DIR = os.path.join(BASE_DIR, "media")
+# Базовая директория для медиа файлов (относительный путь)
+MEDIA_DIR = "media"
 
 async def check_file_access_permission(
     file_path: str,
