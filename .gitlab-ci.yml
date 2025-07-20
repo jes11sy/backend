@@ -119,7 +119,7 @@ deploy_production:
       DEBUG=false
       EOF
 
-
+        cp .env deployment/.env &&
 
         echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin &&
         docker-compose -f deployment/docker-compose.production.yml build --no-cache &&
