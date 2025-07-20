@@ -180,5 +180,11 @@ class Settings(BaseSettings):
             if self.SECRET_KEY.isalnum() or len(set(self.SECRET_KEY)) < 16:
                 print("⚠️  WARNING: SECRET_KEY appears to have low entropy. Use a cryptographically secure random key!")
 
+    jwt_secret_key: str = ""
+    letsencrypt_email: str = ""
+    cloudflare_email: str = ""
+    cloudflare_dns_api_token: str = ""
+    grafana_admin_password: str = ""
+
 
 settings = Settings() 
