@@ -208,6 +208,11 @@ cors_origins = settings.get_allowed_origins
 if not cors_origins:
     cors_origins = ["http://localhost:3000", "https://lead-schem.ru", "https://www.lead-schem.ru"]
 
+# Всегда включаем основные продакшн домены
+cors_origins = list(set(cors_origins + ["https://lead-schem.ru", "https://www.lead-schem.ru"]))
+
+logger.info(f"CORS origins configured: {cors_origins}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
@@ -219,21 +224,21 @@ app.add_middleware(
 # Настройка интерактивной документации
 setup_api_documentation(app)
 
-# ВРЕМЕННО ОТКЛЮЧАЕМ ВСЕ MIDDLEWARE КРОМЕ CORS
-# app.add_middleware(ErrorHandlingMiddleware)
-# app.add_middleware(RequestLoggingMiddleware)
-# app.add_middleware(SecurityHeadersMiddleware)
-# app.add_middleware(RequestSizeLimitMiddleware, max_size=10 * 1024 * 1024)  # 10MB
-# app.add_middleware(CSRFMiddleware)
-# app.add_middleware(
-#     RateLimitMiddleware,
-#     max_requests=settings.RATE_LIMIT_PER_MINUTE,
-#     window_seconds=60
-# )
-# # Добавляем кеширование для GET запросов
-# app.add_middleware(CacheMiddleware, cache_ttl=settings.CACHE_TTL)
-# # Добавляем middleware для сбора метрик
-# app.middleware("http")(MetricsMiddleware(performance_collector))
+# Включаем только необходимые middleware
+app.add_middleware(ErrorHandlingMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RequestSizeLimitMiddleware, max_size=10 * 1024 * 1024)  # 10MB
+# app.add_middleware(CSRFMiddleware)  # Отключаем CSRF пока
+app.add_middleware(
+    RateLimitMiddleware,
+    max_requests=settings.RATE_LIMIT_PER_MINUTE,
+    window_seconds=60
+)
+# Добавляем кеширование для GET запросов
+app.add_middleware(CacheMiddleware, cache_ttl=settings.CACHE_TTL)
+# Добавляем middleware для сбора метрик
+app.middleware("http")(MetricsMiddleware(performance_collector))
 
 # Подключение статических файлов
 if os.path.exists("media"):
