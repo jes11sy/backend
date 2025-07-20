@@ -115,7 +115,7 @@ deploy_production:
       GRAFANA_ADMIN_PASSWORD="${GRAFANA_ADMIN_PASSWORD}"
 
       # CORS Configuration
-      CORS_ORIGINS="${CORS_ORIGINS}"
+      CORS_ORIGINS="https://lead-schem.ru,https://www.lead-schem.ru"
 
       # Rambler IMAP for recordings
       RAMBLER_IMAP_USERNAME="${RAMBLER_IMAP_USERNAME}"

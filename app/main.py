@@ -202,9 +202,15 @@ app = FastAPI(
 )
 
 # ВКЛЮЧАЕМ CORS MIDDLEWARE ПЕРВЫМ!
+from .core.config import settings
+cors_origins = settings.get_allowed_origins
+# Добавляем основные домены если не настроены через env
+if not cors_origins:
+    cors_origins = ["http://localhost:3000", "https://lead-schem.ru", "https://www.lead-schem.ru"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://lead-schem.ru", "https://www.lead-schem.ru"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
