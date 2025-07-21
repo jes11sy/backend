@@ -42,31 +42,7 @@ services:
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
 
-  # Kong API Gateway
-  kong:
-    image: kong:3.4.0
-    container_name: kong-production
-    restart: unless-stopped
-    environment:
-      - KONG_DATABASE=off
-      - KONG_DECLARATIVE_CONFIG=/kong/declarative/kong.yml
-      - KONG_PROXY_ACCESS_LOG=/dev/stdout
-      - KONG_ADMIN_ACCESS_LOG=/dev/stdout
-      - KONG_PROXY_ERROR_LOG=/dev/stderr
-      - KONG_ADMIN_ERROR_LOG=/dev/stderr
-      - KONG_ADMIN_LISTEN=0.0.0.0:8001
-    volumes:
-      - ./deployment/kong/kong.production.yml:/kong/declarative/kong.yml:ro
-    networks:
-      - backend_network
-    depends_on:
-      - backend
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.kong.rule=Host(`api.lead-schem.ru`)"
-      - "traefik.http.routers.kong.tls=true"
-      - "traefik.http.routers.kong.tls.certresolver=letsencrypt"
-      - "traefik.http.services.kong.loadbalancer.server.port=8000"
+
 
   # Redis для кеширования
   redis:
