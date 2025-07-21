@@ -330,7 +330,10 @@ def setup_api_documentation(app: FastAPI):
     Настройка документации API
     """
     # Устанавливаем кастомную схему OpenAPI
-    app.openapi = lambda: get_custom_openapi_schema(app)
+    def custom_openapi():
+        return get_custom_openapi_schema(app)
+    
+    app.openapi = custom_openapi
 
     # Добавляем примеры в схемы
     _add_examples_to_schemas(app)

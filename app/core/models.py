@@ -157,9 +157,9 @@ class Request(Base):
     master_id = Column(Integer, ForeignKey("masters.id"))
     master_notes = Column(Text)
     result = Column(Numeric(10, 2), nullable=True)
-    expenses = Column(DECIMAL(10, 2), default=0)
-    net_amount = Column(DECIMAL(10, 2), default=0)
-    master_handover = Column(DECIMAL(10, 2), default=0)
+    expenses: Column = Column(DECIMAL(10, 2), default=0)
+    net_amount: Column = Column(DECIMAL(10, 2), default=0)
+    master_handover: Column = Column(DECIMAL(10, 2), default=0)
     ats_number = Column(String(50))
     call_center_name = Column(String(200))
     call_center_notes = Column(Text)
@@ -189,7 +189,7 @@ class Transaction(Base):
     transaction_type_id = Column(
         Integer, ForeignKey("transaction_types.id"), nullable=False
     )
-    amount = Column(DECIMAL(10, 2), nullable=False)
+    amount: Column = Column(DECIMAL(10, 2), nullable=False)
     notes = Column(Text)
     file_path = Column(String(500))
     specified_date = Column(Date, nullable=False)

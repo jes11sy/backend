@@ -174,7 +174,7 @@ class RequestValidator:
     @staticmethod
     def validate_request_data(data: Dict[str, Any]) -> Dict[str, Any]:
         """Валидация данных заявки"""
-        validated_data = {}
+        validated_data: Dict[str, Any] = {}
 
         # Валидация обязательных полей
         if "client_phone" in data:
@@ -227,7 +227,7 @@ class TransactionValidator:
     @staticmethod
     def validate_transaction_data(data: Dict[str, Any]) -> Dict[str, Any]:
         """Валидация данных транзакции"""
-        validated_data = {}
+        validated_data: Dict[str, Any] = {}
 
         # Валидация суммы
         if "amount" in data:
@@ -269,7 +269,7 @@ class UserValidator:
     @staticmethod
     def validate_user_data(data: Dict[str, Any]) -> Dict[str, Any]:
         """Валидация данных пользователя"""
-        validated_data = {}
+        validated_data: Dict[str, Any] = {}
 
         # Валидация логина
         if "login" in data:

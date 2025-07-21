@@ -33,15 +33,11 @@ except ImportError as e:
     # Fallback - попробуем импортировать напрямую
     import importlib
 
-    command = importlib.import_module("alembic.command")
-    Config = importlib.import_module("alembic.config").Config
-    ScriptDirectory = importlib.import_module("alembic.script").ScriptDirectory
-    MigrationContext = importlib.import_module(
-        "alembic.runtime.migration"
-    ).MigrationContext
-    EnvironmentContext = importlib.import_module(
-        "alembic.runtime.environment"
-    ).EnvironmentContext
+    from alembic import command
+    from alembic.config import Config  
+    from alembic.script import ScriptDirectory
+    from alembic.runtime.migration import MigrationContext
+    from alembic.runtime.environment import EnvironmentContext
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from .config import settings

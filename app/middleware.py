@@ -141,28 +141,28 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
         """Получение HTTP статус кода для типа ошибки"""
         status_mapping = {
             ErrorCode.VALIDATION_ERROR: 400,
-            ErrorCode.INVALID_INPUT: 400,
-            ErrorCode.REQUIRED_FIELD_MISSING: 400,
-            ErrorCode.AUTHENTICATION_ERROR: 401,
+            ErrorCode.INVALID_FORMAT: 400,
+            ErrorCode.MISSING_REQUIRED_FIELD: 400,
+            ErrorCode.AUTHENTICATION_FAILED: 401,
             ErrorCode.TOKEN_EXPIRED: 401,
-            ErrorCode.INVALID_TOKEN: 401,
-            ErrorCode.AUTHORIZATION_ERROR: 403,
+            ErrorCode.TOKEN_INVALID: 401,
+            ErrorCode.AUTHORIZATION_FAILED: 403,
             ErrorCode.INSUFFICIENT_PERMISSIONS: 403,
-            ErrorCode.ACCOUNT_LOCKED: 423,
+            ErrorCode.RATE_LIMIT_EXCEEDED: 423,  # нет ACCOUNT_LOCKED, используем RATE_LIMIT_EXCEEDED
             ErrorCode.RECORD_NOT_FOUND: 404,
             ErrorCode.DUPLICATE_RECORD: 409,
-            ErrorCode.CONSTRAINT_VIOLATION: 409,
-            ErrorCode.BUSINESS_LOGIC_ERROR: 422,
-            ErrorCode.RESOURCE_UNAVAILABLE: 503,
+            ErrorCode.FOREIGN_KEY_CONSTRAINT: 409,  # вместо CONSTRAINT_VIOLATION
+            ErrorCode.BUSINESS_RULE_VIOLATION: 422,  # вместо BUSINESS_LOGIC_ERROR
+            ErrorCode.SERVICE_UNAVAILABLE: 503,  # вместо RESOURCE_UNAVAILABLE
             ErrorCode.FILE_NOT_FOUND: 404,
             ErrorCode.FILE_TOO_LARGE: 413,
             ErrorCode.INVALID_FILE_TYPE: 415,
             ErrorCode.EXTERNAL_SERVICE_ERROR: 502,
-            ErrorCode.CACHE_ERROR: 503,
-            ErrorCode.EMAIL_SERVICE_ERROR: 503,
-            ErrorCode.NETWORK_ERROR: 502,
-            ErrorCode.TIMEOUT_ERROR: 504,
-            ErrorCode.CONNECTION_ERROR: 502,
+            ErrorCode.INTERNAL_ERROR: 503,  # вместо CACHE_ERROR  
+            ErrorCode.EXTERNAL_SERVICE_ERROR: 503,  # вместо EMAIL_SERVICE_ERROR
+            ErrorCode.EXTERNAL_SERVICE_ERROR: 502,  # вместо NETWORK_ERROR
+            ErrorCode.EXTERNAL_SERVICE_TIMEOUT: 504,  # вместо TIMEOUT_ERROR
+            ErrorCode.DATABASE_CONNECTION_ERROR: 502,  # вместо CONNECTION_ERROR
             ErrorCode.DATABASE_ERROR: 500,
         }
         return status_mapping.get(error_code, 500)

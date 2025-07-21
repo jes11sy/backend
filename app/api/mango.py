@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from ..core.database import get_db
 from ..core import crud, schemas
+from ..core.enhanced_schemas import RequestStatus
 from ..core.config import settings
 from datetime import datetime
 import logging
@@ -68,7 +69,7 @@ async def mango_webhook(
 ):
     # Логируем сырое тело
     raw_body = await request.body()
-    logging.warning(f"MANGO RAW BODY: {raw_body}")
+    logging.warning(f"MANGO RAW BODY: {raw_body!r}")
 
     # Пробуем получить form-data и распарсить JSON
     try:
@@ -189,7 +190,14 @@ async def mango_webhook(
         city_id=campaign.city_id,
         request_type_id=request_type_id,
         client_phone=from_number,
-        status="Новая",
+        client_name=None,
+        address=None,
+        meeting_date=None,
+        direction_id=None,
+        problem=None,
+        master_id=None,
+        master_notes=None,
+        status=RequestStatus.NEW,
         ats_number=phone_number,
         result=None,
         call_center_name=None,
