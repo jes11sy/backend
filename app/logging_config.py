@@ -263,7 +263,7 @@ class LoggerAdapter(logging.LoggerAdapter):
     def __init__(self, logger: logging.Logger, extra: Dict[str, Any] | None = None):
         super().__init__(logger, extra or {})
 
-    def process(self, msg: str, kwargs: Dict[str, Any]) -> tuple:
+    def process(self, msg: str, kwargs):  # type: ignore[override]
         # Добавляем extra информацию в каждый лог
         if "extra" not in kwargs:
             kwargs["extra"] = {}

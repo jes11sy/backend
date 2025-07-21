@@ -249,7 +249,7 @@ class RateLimitExceededError(BaseAppException):
         limit: Optional[int] = None,
         window: Optional[str] = None,
     ):
-        details = {}
+        details: Dict[str, Any] = {}
         if limit:
             details["limit"] = limit
         if window:
@@ -258,7 +258,7 @@ class RateLimitExceededError(BaseAppException):
         super().__init__(
             message=message,
             error_code=ErrorCode.RATE_LIMIT_EXCEEDED,
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            status_code=429,  # status.HTTP_429_TOO_MANY_REQUESTS
             details=details,
         )
 

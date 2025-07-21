@@ -153,7 +153,7 @@ class FileAuditLogger:
     @staticmethod
     async def get_file_access_history(
         db: AsyncSession, file_path: str, limit: int = 100
-    ) -> list:
+    ) -> list[FileAccessLog]:
         """Получить историю доступа к конкретному файлу"""
         try:
             result = await db.execute(
@@ -162,13 +162,13 @@ class FileAuditLogger:
                 .order_by(FileAccessLog.timestamp.desc())
                 .limit(limit)
             )
-            return result.scalars().all()
+            return list(result.scalars().all())
         except Exception as e:
             logger.error(f"Failed to get file access history: {e}")
             return []
 
     @staticmethod
-    async def get_suspicious_activity(db: AsyncSession, limit: int = 100) -> list:
+    async def get_suspicious_activity(db: AsyncSession, limit: int = 100) -> list[FileAccessLog]:
         """Получить подозрительную активность"""
         try:
             result = await db.execute(
@@ -177,7 +177,7 @@ class FileAuditLogger:
                 .order_by(FileAccessLog.timestamp.desc())
                 .limit(limit)
             )
-            return result.scalars().all()
+            return list(result.scalars().all())
         except Exception as e:
             logger.error(f"Failed to get suspicious activity: {e}")
             return []
@@ -292,9 +292,9 @@ def create_file_access_event(
         user_type = "unknown"
 
     return FileAccessEvent(
-        user_id=user.id,
+        user_id=user.id,  # type: ignore[arg-type]
         user_type=user_type,
-        user_login=user.login,
+        user_login=user.login,  # type: ignore[arg-type]
         file_path=file_path,
         action=action,
         result=result,

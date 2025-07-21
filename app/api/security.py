@@ -35,6 +35,9 @@ async def get_login_attempts_stats(
             "locked_accounts": 0,
             "unique_ips": set(),
             "recent_attempts": [],
+            "expired_tokens": 0,
+            "valid_tokens": 0,
+            "tokens_info": [],
         }
 
         current_time = datetime.utcnow()
@@ -167,11 +170,11 @@ async def get_csrf_tokens_stats(
             is_expired = current_time > token_data["expires_at"]
 
             if is_expired:
-                stats["expired_tokens"] += 1
+                stats["expired_tokens"] += 1  # type: ignore[operator]
             else:
-                stats["valid_tokens"] += 1
+                stats["valid_tokens"] += 1  # type: ignore[operator]
 
-            stats["tokens_info"].append(
+            stats["tokens_info"].append(  # type: ignore[attr-defined]
                 {
                     "session_id": session_id[:8] + "...",  # Маскируем для безопасности
                     "created_at": token_data["created_at"].isoformat(),

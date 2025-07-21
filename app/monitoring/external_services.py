@@ -152,10 +152,10 @@ class ExternalServicesHealthChecker:
                         "response_time_ms": round(response_time * 1000, 2),
                         "total_requests": data[0] if data else 0,
                         "recent_requests": data[1] if data else 0,
-                        "pool_size": engine.pool.size(),
-                        "checked_in": engine.pool.checkedin(),
-                        "checked_out": engine.pool.checkedout(),
-                        "overflow": engine.pool.overflow(),
+                        "pool_size": getattr(engine.pool, 'size', lambda: 0)(),
+                        "checked_in": getattr(engine.pool, 'checkedin', lambda: 0)(),
+                        "checked_out": getattr(engine.pool, 'checkedout', lambda: 0)(),
+                        "overflow": getattr(engine.pool, 'overflow', lambda: 0)(),
                     },
                     timestamp=datetime.now(),
                     last_check=datetime.now(),
@@ -255,7 +255,7 @@ class ExternalServicesHealthChecker:
                 for service in external_services:
                     try:
                         async with session.get(
-                            service["url"], timeout=service["timeout"]
+                            str(service["url"]), timeout=service["timeout"]  # type: ignore[arg-type]
                         ) as response:
                             results.append(
                                 {

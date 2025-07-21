@@ -1,7 +1,7 @@
 try:
-    from pydantic_settings import BaseSettings
+    from pydantic_settings import BaseSettings  # type: ignore[import]
 except ImportError:
-    from pydantic import BaseSettings
+    from pydantic import BaseSettings  # type: ignore[import,no-redef]
 from typing import Optional, List
 import secrets
 import os

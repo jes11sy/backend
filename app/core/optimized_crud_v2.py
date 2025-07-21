@@ -325,7 +325,7 @@ class OptimizedCRUDv2:
         ]
 
         # Выполняем все запросы параллельно
-        results = await asyncio.gather(*[db.execute(query) for query in queries])
+        results = await asyncio.gather(*[db.execute(query) for query in queries])  # type: ignore
 
         total_count = results[0].scalar()
         status_stats = {row[0]: row[1] for row in results[1].fetchall()}

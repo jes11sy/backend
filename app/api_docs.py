@@ -333,7 +333,7 @@ def setup_api_documentation(app: FastAPI):
     def custom_openapi():
         return get_custom_openapi_schema(app)
     
-    app.openapi = custom_openapi
+    app.openapi = custom_openapi  # type: ignore[method-assign]
 
     # Добавляем примеры в схемы
     _add_examples_to_schemas(app)
@@ -370,7 +370,7 @@ def create_endpoint_docs(
     """
     Создает документацию для эндпоинта
     """
-    docs = {"summary": summary, "description": description}
+    docs: Dict[str, Any] = {"summary": summary, "description": description}
 
     if examples:
         docs["examples"] = examples
