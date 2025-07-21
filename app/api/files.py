@@ -114,23 +114,6 @@ async def upload_expense_receipt(
         logging.warning(f"Ошибка безопасности при загрузке файла: {e}")
         raise HTTPException(status_code=400, detail=str(e))
         
-        # Генерируем уникальное имя файла
-        if not file.filename:
-            raise HTTPException(status_code=400, detail="Имя файла не указано")
-        
-        ext = os.path.splitext(file.filename)[1].lower()
-        filename = f"{uuid4()}{ext}"
-        file_path = os.path.join(UPLOAD_DIR, filename)
-        
-        # Сохраняем файл
-        with open(file_path, "wb") as f:
-            f.write(content)
-        
-        logging.info(f"Файл загружен пользователем {current_user.login}: {file_path}, размер: {len(content)} байт")
-        
-        # Возвращаем относительный путь
-        return JSONResponse({"file_path": file_path})
-        
     except HTTPException:
         raise
     except Exception as e:

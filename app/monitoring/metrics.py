@@ -589,7 +589,6 @@ async def collect_metrics_background():
 
 async def start_metrics_collection():
     """Запуск фоновой задачи сбора метрик"""
-    global metrics_collector
     if not metrics_collector._running:
         metrics_collector._running = True
         metrics_collector._background_task = asyncio.create_task(collect_metrics_background())
@@ -598,7 +597,6 @@ async def start_metrics_collection():
 
 async def stop_metrics_collection():
     """Остановка фоновой задачи сбора метрик"""
-    global metrics_collector
     if metrics_collector._running:
         metrics_collector._running = False
         if metrics_collector._background_task:
