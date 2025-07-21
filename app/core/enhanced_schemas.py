@@ -45,9 +45,9 @@ class CitySchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор города", example=1)
+    id: int = Field(..., description="Уникальный идентификатор города", examples=1)
     name: str = Field(
-        ..., max_length=100, description="Название города", example="Москва"
+        ..., max_length=100, description="Название города", examples="Москва"
     )
 
 
@@ -56,12 +56,12 @@ class RequestTypeSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор типа заявки", example=1)
+    id: int = Field(..., description="Уникальный идентификатор типа заявки", examples=1)
     name: str = Field(
         ...,
         max_length=50,
         description="Название типа заявки",
-        example="Ремонт кондиционера",
+        examples="Ремонт кондиционера",
     )
 
 
@@ -70,12 +70,12 @@ class DirectionSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор направления", example=1)
+    id: int = Field(..., description="Уникальный идентификатор направления", examples=1)
     name: str = Field(
         ...,
         max_length=50,
         description="Название направления",
-        example="Бытовая техника",
+        examples="Бытовая техника",
     )
 
 
@@ -84,9 +84,9 @@ class RoleSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор роли", example=1)
+    id: int = Field(..., description="Уникальный идентификатор роли", examples=1)
     name: str = Field(
-        ..., max_length=50, description="Название роли", example="callcenter"
+        ..., max_length=50, description="Название роли", examples="callcenter"
     )
 
 
@@ -96,10 +96,10 @@ class TransactionTypeSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int = Field(
-        ..., description="Уникальный идентификатор типа транзакции", example=1
+        ..., description="Уникальный идентификатор типа транзакции", examples=1
     )
     name: str = Field(
-        ..., max_length=50, description="Название типа транзакции", example="Расход"
+        ..., max_length=50, description="Название типа транзакции", examples="Расход"
     )
 
 
@@ -108,18 +108,18 @@ class AdvertisingCampaignCreateSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    city_id: int = Field(..., description="ID города", example=1)
+    city_id: int = Field(..., description="ID города", examples=1)
     name: str = Field(
         ...,
         max_length=200,
         description="Название кампании",
-        example="Яндекс Директ - Ремонт кондиционеров",
+        examples="Яндекс Директ - Ремонт кондиционеров",
     )
     phone_number: str = Field(
         ...,
         max_length=20,
         description="Номер телефона кампании",
-        example="+7 (999) 123-45-67",
+        examples="+7 (999) 123-45-67",
     )
 
 
@@ -128,19 +128,19 @@ class AdvertisingCampaignSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор кампании", example=1)
-    city_id: int = Field(..., description="ID города", example=1)
+    id: int = Field(..., description="Уникальный идентификатор кампании", examples=1)
+    city_id: int = Field(..., description="ID города", examples=1)
     name: str = Field(
         ...,
         max_length=200,
         description="Название кампании",
-        example="Яндекс Директ - Ремонт кондиционеров",
+        examples="Яндекс Директ - Ремонт кондиционеров",
     )
     phone_number: str = Field(
         ...,
         max_length=20,
         description="Номер телефона кампании",
-        example="+7 (999) 123-45-67",
+        examples="+7 (999) 123-45-67",
     )
 
 
@@ -149,39 +149,39 @@ class MasterSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор мастера", example=1)
-    city_id: int = Field(..., description="ID города", example=1)
+    id: int = Field(..., description="Уникальный идентификатор мастера", examples=1)
+    city_id: int = Field(..., description="ID города", examples=1)
     full_name: str = Field(
         ...,
         max_length=200,
         description="Полное имя мастера",
-        example="Сидоров Алексей Владимирович",
+        examples="Сидоров Алексей Владимирович",
     )
     phone_number: str = Field(
-        ..., max_length=20, description="Номер телефона", example="+7 (999) 555-12-34"
+        ..., max_length=20, description="Номер телефона", examples="+7 (999) 555-12-34"
     )
     birth_date: Optional[date] = Field(
-        None, description="Дата рождения", example="1985-03-15"
+        None, description="Дата рождения", examples="1985-03-15"
     )
     passport: Optional[str] = Field(
-        None, max_length=20, description="Паспортные данные", example="4510 123456"
+        None, max_length=20, description="Паспортные данные", examples="4510 123456"
     )
     status: UserStatus = Field(
-        default=UserStatus.ACTIVE, description="Статус мастера", example="active"
+        default=UserStatus.ACTIVE, description="Статус мастера", examples="active"
     )
     chat_id: Optional[str] = Field(
         None,
         max_length=100,
         description="ID чата Telegram",
-        example="telegram_123456789",
+        examples="telegram_123456789",
     )
     login: str = Field(
-        ..., max_length=100, description="Логин для входа", example="master_sidorov"
+        ..., max_length=100, description="Логин для входа", examples="master_sidorov"
     )
     notes: Optional[str] = Field(
         None,
         description="Дополнительные заметки",
-        example="Специализация: кондиционеры, стаж 8 лет",
+        examples="Специализация: кондиционеры, стаж 8 лет",
     )
 
 
@@ -190,25 +190,25 @@ class EmployeeSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор сотрудника", example=1)
+    id: int = Field(..., description="Уникальный идентификатор сотрудника", examples=1)
     name: str = Field(
         ...,
         max_length=200,
         description="Имя сотрудника",
-        example="Козлова Мария Петровна",
+        examples="Козлова Мария Петровна",
     )
-    role_id: int = Field(..., description="ID роли", example=2)
+    role_id: int = Field(..., description="ID роли", examples=2)
     status: UserStatus = Field(
-        default=UserStatus.ACTIVE, description="Статус сотрудника", example="active"
+        default=UserStatus.ACTIVE, description="Статус сотрудника", examples="active"
     )
-    city_id: Optional[int] = Field(None, description="ID города", example=1)
+    city_id: Optional[int] = Field(None, description="ID города", examples=1)
     login: str = Field(
-        ..., max_length=100, description="Логин для входа", example="maria_kozlova"
+        ..., max_length=100, description="Логин для входа", examples="maria_kozlova"
     )
     notes: Optional[str] = Field(
         None,
         description="Дополнительные заметки",
-        example="Опыт работы в колл-центре 3 года",
+        examples="Опыт работы в колл-центре 3 года",
     )
     role: Optional[RoleSchema] = Field(None, description="Информация о роли")
 
@@ -219,23 +219,23 @@ class AdministratorSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int = Field(
-        ..., description="Уникальный идентификатор администратора", example=1
+        ..., description="Уникальный идентификатор администратора", examples=1
     )
     name: str = Field(
         ...,
         max_length=200,
         description="Имя администратора",
-        example="Админов Админ Админович",
+        examples="Админов Админ Админович",
     )
-    role_id: int = Field(..., description="ID роли", example=5)
+    role_id: int = Field(..., description="ID роли", examples=5)
     status: UserStatus = Field(
-        default=UserStatus.ACTIVE, description="Статус администратора", example="active"
+        default=UserStatus.ACTIVE, description="Статус администратора", examples="active"
     )
     login: str = Field(
-        ..., max_length=100, description="Логин для входа", example="admin"
+        ..., max_length=100, description="Логин для входа", examples="admin"
     )
     notes: Optional[str] = Field(
-        None, description="Дополнительные заметки", example="Системный администратор"
+        None, description="Дополнительные заметки", examples="Системный администратор"
     )
     role: Optional[RoleSchema] = Field(None, description="Информация о роли")
 
@@ -245,15 +245,15 @@ class FileSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор файла", example=1)
-    request_id: Optional[int] = Field(None, description="ID заявки", example=1)
-    transaction_id: Optional[int] = Field(None, description="ID транзакции", example=1)
-    file_type: str = Field(..., max_length=50, description="Тип файла", example="bso")
+    id: int = Field(..., description="Уникальный идентификатор файла", examples=1)
+    request_id: Optional[int] = Field(None, description="ID заявки", examples=1)
+    transaction_id: Optional[int] = Field(None, description="ID транзакции", examples=1)
+    file_type: str = Field(..., max_length=50, description="Тип файла", examples="bso")
     file_path: str = Field(
         ...,
         max_length=500,
         description="Путь к файлу",
-        example="/media/zayvka/bso/file.jpg",
+        examples="/media/zayvka/bso/file.jpg",
     )
 
 
@@ -271,9 +271,9 @@ class UserLogin(BaseModel):
         }
     )
 
-    login: str = Field(..., description="Логин пользователя", example="master001")
+    login: str = Field(..., description="Логин пользователя", examples="master001")
     password: str = Field(
-        ..., description="Пароль пользователя", example="secure_password123"
+        ..., description="Пароль пользователя", examples="secure_password123"
     )
 
 
@@ -309,77 +309,77 @@ class RequestCreateSchema(BaseModel):
     )
 
     advertising_campaign_id: Optional[int] = Field(
-        None, description="ID рекламной кампании", example=1
+        None, description="ID рекламной кампании", examples=1
     )
-    city_id: int = Field(..., description="ID города (обязательно)", example=1)
+    city_id: int = Field(..., description="ID города (обязательно)", examples=1)
     request_type_id: Optional[int] = Field(
-        None, description="ID типа заявки", example=1
+        None, description="ID типа заявки", examples=1
     )
     client_phone: str = Field(
-        ..., max_length=20, description="Телефон клиента", example="+7 (999) 123-45-67"
+        ..., max_length=20, description="Телефон клиента", examples="+7 (999) 123-45-67"
     )
     client_name: Optional[str] = Field(
-        None, max_length=200, description="Имя клиента", example="Иванов Иван Иванович"
+        None, max_length=200, description="Имя клиента", examples="Иванов Иван Иванович"
     )
     address: Optional[str] = Field(
         None,
         description="Адрес клиента",
-        example="г. Москва, ул. Примерная, д. 123, кв. 45",
+        examples="г. Москва, ул. Примерная, д. 123, кв. 45",
     )
     meeting_date: Optional[datetime] = Field(
-        None, description="Дата и время встречи", example="2025-01-20T14:30:00"
+        None, description="Дата и время встречи", examples="2025-01-20T14:30:00"
     )
-    direction_id: Optional[int] = Field(None, description="ID направления", example=1)
+    direction_id: Optional[int] = Field(None, description="ID направления", examples=1)
     problem: Optional[str] = Field(
         None,
         description="Описание проблемы",
-        example="Не работает кондиционер, требуется диагностика",
+        examples="Не работает кондиционер, требуется диагностика",
     )
     status: RequestStatus = Field(
-        default=RequestStatus.NEW, description="Статус заявки", example="Новая"
+        default=RequestStatus.NEW, description="Статус заявки", examples="Новая"
     )
     master_id: Optional[int] = Field(
-        None, description="ID назначенного мастера", example=1
+        None, description="ID назначенного мастера", examples=1
     )
     master_notes: Optional[str] = Field(
         None,
         description="Заметки мастера",
-        example="Требуется дополнительная диагностика",
+        examples="Требуется дополнительная диагностика",
     )
     result: Optional[Decimal] = Field(
-        None, decimal_places=2, description="Результат работы (сумма)", example=2500.00
+        None, decimal_places=2, description="Результат работы (сумма)", examples=2500.00
     )
     expenses: Decimal = Field(
-        default=Decimal("0.00"), decimal_places=2, description="Расходы", example=450.00
+        default=Decimal("0.00"), decimal_places=2, description="Расходы", examples=450.00
     )
     net_amount: Decimal = Field(
         default=Decimal("0.00"),
         decimal_places=2,
         description="Чистая сумма",
-        example=2050.00,
+        examples=2050.00,
     )
     master_handover: Decimal = Field(
         default=Decimal("0.00"),
         decimal_places=2,
         description="Передача мастеру",
-        example=1230.00,
+        examples=1230.00,
     )
     ats_number: Optional[str] = Field(
-        None, max_length=50, description="Номер АТС", example="ATS-2025-001"
+        None, max_length=50, description="Номер АТС", examples="ATS-2025-001"
     )
     call_center_name: Optional[str] = Field(
         None,
         max_length=200,
         description="Имя сотрудника колл-центра",
-        example="Петрова Анна",
+        examples="Петрова Анна",
     )
     call_center_notes: Optional[str] = Field(
         None,
         description="Заметки колл-центра",
-        example="Клиент очень вежливый, просит перезвонить после 15:00",
+        examples="Клиент очень вежливый, просит перезвонить после 15:00",
     )
     avito_chat_id: Optional[str] = Field(
-        None, max_length=100, description="ID чата Avito", example="avito_chat_123"
+        None, max_length=100, description="ID чата Avito", examples="avito_chat_123"
     )
 
     @field_validator("meeting_date", mode="before")
@@ -427,25 +427,25 @@ class RequestUpdateSchema(BaseModel):
     direction_id: Optional[int] = Field(None, description="ID направления")
     problem: Optional[str] = Field(None, description="Описание проблемы")
     status: Optional[RequestStatus] = Field(
-        None, description="Статус заявки", example="Готово"
+        None, description="Статус заявки", examples="Готово"
     )
     master_id: Optional[int] = Field(None, description="ID назначенного мастера")
     master_notes: Optional[str] = Field(
         None,
         description="Заметки мастера",
-        example="Заменен фильтр кондиционера, проведена чистка",
+        examples="Заменен фильтр кондиционера, проведена чистка",
     )
     result: Optional[Decimal] = Field(
-        None, decimal_places=2, description="Результат работы (сумма)", example=2500.00
+        None, decimal_places=2, description="Результат работы (сумма)", examples=2500.00
     )
     expenses: Optional[Decimal] = Field(
-        None, decimal_places=2, description="Расходы", example=450.00
+        None, decimal_places=2, description="Расходы", examples=450.00
     )
     net_amount: Optional[Decimal] = Field(
-        None, decimal_places=2, description="Чистая сумма", example=2050.00
+        None, decimal_places=2, description="Чистая сумма", examples=2050.00
     )
     master_handover: Optional[Decimal] = Field(
-        None, decimal_places=2, description="Передача мастеру", example=1230.00
+        None, decimal_places=2, description="Передача мастеру", examples=1230.00
     )
     ats_number: Optional[str] = Field(None, max_length=50, description="Номер АТС")
     call_center_name: Optional[str] = Field(
@@ -462,28 +462,28 @@ class RequestResponseSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор заявки", example=1)
-    city_id: int = Field(..., description="ID города", example=1)
+    id: int = Field(..., description="Уникальный идентификатор заявки", examples=1)
+    city_id: int = Field(..., description="ID города", examples=1)
     request_type_id: Optional[int] = Field(
-        None, description="ID типа заявки", example=1
+        None, description="ID типа заявки", examples=1
     )
     client_phone: str = Field(
-        ..., description="Телефон клиента", example="+7 (999) 123-45-67"
+        ..., description="Телефон клиента", examples="+7 (999) 123-45-67"
     )
     client_name: Optional[str] = Field(
-        None, description="Имя клиента", example="Иванов Иван Иванович"
+        None, description="Имя клиента", examples="Иванов Иван Иванович"
     )
     address: Optional[str] = Field(
         None,
         description="Адрес клиента",
-        example="г. Москва, ул. Примерная, д. 123, кв. 45",
+        examples="г. Москва, ул. Примерная, д. 123, кв. 45",
     )
     meeting_date: Optional[datetime] = Field(
-        None, description="Дата и время встречи", example="2025-01-20T14:30:00"
+        None, description="Дата и время встречи", examples="2025-01-20T14:30:00"
     )
-    status: str = Field(..., description="Статус заявки", example="Новая")
+    status: str = Field(..., description="Статус заявки", examples="Новая")
     created_at: datetime = Field(
-        ..., description="Дата создания", example="2025-01-15T10:30:00"
+        ..., description="Дата создания", examples="2025-01-15T10:30:00"
     )
 
     # Связанные объекты
@@ -530,22 +530,22 @@ class TransactionCreateSchema(BaseModel):
         }
     )
 
-    city_id: int = Field(..., description="ID города", example=1)
-    transaction_type_id: int = Field(..., description="ID типа транзакции", example=1)
+    city_id: int = Field(..., description="ID города", examples=1)
+    transaction_type_id: int = Field(..., description="ID типа транзакции", examples=1)
     amount: Decimal = Field(
-        ..., decimal_places=2, description="Сумма транзакции", example=15000.50
+        ..., decimal_places=2, description="Сумма транзакции", examples=15000.50
     )
     notes: Optional[str] = Field(
         None,
         description="Примечания",
-        example="Закупка запчастей для ремонта кондиционеров",
+        examples="Закупка запчастей для ремонта кондиционеров",
     )
-    specified_date: date = Field(..., description="Дата операции", example="2025-01-15")
+    specified_date: date = Field(..., description="Дата операции", examples="2025-01-15")
     payment_reason: Optional[str] = Field(
-        None, description="Причина платежа", example="Материалы для заявки #123"
+        None, description="Причина платежа", examples="Материалы для заявки #123"
     )
     expense_receipt_path: Optional[str] = Field(
-        None, description="Путь к чеку", example="/media/receipts/receipt_123.jpg"
+        None, description="Путь к чеку", examples="/media/receipts/receipt_123.jpg"
     )
 
 
@@ -554,20 +554,20 @@ class TransactionResponseSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор транзакции", example=1)
-    city_id: int = Field(..., description="ID города", example=1)
-    transaction_type_id: int = Field(..., description="ID типа транзакции", example=1)
-    amount: Decimal = Field(..., description="Сумма транзакции", example=15000.50)
+    id: int = Field(..., description="Уникальный идентификатор транзакции", examples=1)
+    city_id: int = Field(..., description="ID города", examples=1)
+    transaction_type_id: int = Field(..., description="ID типа транзакции", examples=1)
+    amount: Decimal = Field(..., description="Сумма транзакции", examples=15000.50)
     notes: Optional[str] = Field(
-        None, description="Примечания", example="Закупка запчастей"
+        None, description="Примечания", examples="Закупка запчастей"
     )
-    specified_date: date = Field(..., description="Дата операции", example="2025-01-15")
+    specified_date: date = Field(..., description="Дата операции", examples="2025-01-15")
     payment_reason: Optional[str] = Field(
-        None, description="Причина платежа", example="Материалы для заявки #123"
+        None, description="Причина платежа", examples="Материалы для заявки #123"
     )
     expense_receipt_path: Optional[str] = Field(None, description="Путь к чеку")
     created_at: datetime = Field(
-        ..., description="Дата создания", example="2025-01-15T10:30:00"
+        ..., description="Дата создания", examples="2025-01-15T10:30:00"
     )
 
     # Связанные объекты
@@ -596,39 +596,39 @@ class MasterCreateSchema(BaseModel):
         }
     )
 
-    city_id: int = Field(..., description="ID города", example=1)
+    city_id: int = Field(..., description="ID города", examples=1)
     full_name: str = Field(
         ...,
         max_length=200,
         description="Полное имя",
-        example="Сидоров Алексей Владимирович",
+        examples="Сидоров Алексей Владимирович",
     )
     phone_number: str = Field(
-        ..., max_length=20, description="Номер телефона", example="+7 (999) 555-12-34"
+        ..., max_length=20, description="Номер телефона", examples="+7 (999) 555-12-34"
     )
     birth_date: Optional[date] = Field(
-        None, description="Дата рождения", example="1985-03-15"
+        None, description="Дата рождения", examples="1985-03-15"
     )
     passport: Optional[str] = Field(
-        None, max_length=20, description="Паспортные данные", example="4510 123456"
+        None, max_length=20, description="Паспортные данные", examples="4510 123456"
     )
     status: UserStatus = Field(
-        default=UserStatus.ACTIVE, description="Статус", example="active"
+        default=UserStatus.ACTIVE, description="Статус", examples="active"
     )
     chat_id: Optional[str] = Field(
         None,
         max_length=100,
         description="ID чата Telegram",
-        example="telegram_123456789",
+        examples="telegram_123456789",
     )
     login: str = Field(
-        ..., max_length=100, description="Логин", example="master_sidorov"
+        ..., max_length=100, description="Логин", examples="master_sidorov"
     )
     password: str = Field(
-        ..., min_length=6, description="Пароль", example="secure_pass123"
+        ..., min_length=6, description="Пароль", examples="secure_pass123"
     )
     notes: Optional[str] = Field(
-        None, description="Заметки", example="Специализация: кондиционеры, стаж 8 лет"
+        None, description="Заметки", examples="Специализация: кондиционеры, стаж 8 лет"
     )
 
 
@@ -654,21 +654,21 @@ class EmployeeCreateSchema(BaseModel):
         ...,
         max_length=200,
         description="Имя сотрудника",
-        example="Козлова Мария Петровна",
+        examples="Козлова Мария Петровна",
     )
-    role_id: int = Field(..., description="ID роли", example=2)
+    role_id: int = Field(..., description="ID роли", examples=2)
     status: UserStatus = Field(
-        default=UserStatus.ACTIVE, description="Статус", example="active"
+        default=UserStatus.ACTIVE, description="Статус", examples="active"
     )
-    city_id: Optional[int] = Field(None, description="ID города", example=1)
+    city_id: Optional[int] = Field(None, description="ID города", examples=1)
     login: str = Field(
-        ..., max_length=100, description="Логин", example="maria_kozlova"
+        ..., max_length=100, description="Логин", examples="maria_kozlova"
     )
     password: str = Field(
-        ..., min_length=6, description="Пароль", example="employee_pass456"
+        ..., min_length=6, description="Пароль", examples="employee_pass456"
     )
     notes: Optional[str] = Field(
-        None, description="Заметки", example="Опыт работы в колл-центре 3 года"
+        None, description="Заметки", examples="Опыт работы в колл-центре 3 года"
     )
 
 
@@ -693,14 +693,14 @@ class TokenResponse(BaseModel):
     access_token: str = Field(
         ...,
         description="JWT токен доступа",
-        example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        examples="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     )
-    token_type: str = Field(..., description="Тип токена", example="bearer")
-    user_type: str = Field(..., description="Тип пользователя", example="master")
-    role: str = Field(..., description="Роль пользователя", example="master")
-    user_id: int = Field(..., description="ID пользователя", example=1)
+    token_type: str = Field(..., description="Тип токена", examples="bearer")
+    user_type: str = Field(..., description="Тип пользователя", examples="master")
+    role: str = Field(..., description="Роль пользователя", examples="master")
+    user_id: int = Field(..., description="ID пользователя", examples=1)
     city_id: Optional[int] = Field(
-        None, description="ID города пользователя", example=1
+        None, description="ID города пользователя", examples=1
     )
 
 
@@ -718,7 +718,7 @@ class ErrorResponse(BaseModel):
     )
 
     detail: str = Field(
-        ..., description="Описание ошибки", example="Incorrect login or password"
+        ..., description="Описание ошибки", examples="Incorrect login or password"
     )
 
 
@@ -777,74 +777,15 @@ class HealthCheckResponse(BaseModel):
         }
     )
 
-    status: str = Field(..., description="Общий статус системы", example="healthy")
+    status: str = Field(..., description="Общий статус системы", examples="healthy")
     timestamp: str = Field(
-        ..., description="Время проверки", example="2025-01-15T15:00:00Z"
+        ..., description="Время проверки", examples="2025-01-15T15:00:00Z"
     )
     service: str = Field(
-        ..., description="Название сервиса", example="Request Management System"
+        ..., description="Название сервиса", examples="Request Management System"
     )
-    version: str = Field(..., description="Версия системы", example="1.0.0")
+    version: str = Field(..., description="Версия системы", examples="1.0.0")
     checks: Optional[dict] = Field(None, description="Детальные проверки компонентов")
 
 
-# Authentication schemas для совместимости
-class UserLogin(BaseModel):
-    """Схема входа пользователя"""
 
-    login: str = Field(..., description="Логин пользователя", example="admin")
-    password: str = Field(..., description="Пароль пользователя", example="password123")
-
-
-class Token(BaseModel):
-    """Схема токена"""
-
-    access_token: str = Field(..., description="JWT токен")
-    token_type: str = Field(default="bearer", description="Тип токена")
-
-
-class TokenData(BaseModel):
-    """Данные токена"""
-
-    login: Optional[str] = Field(None, description="Логин пользователя")
-    role: Optional[str] = Field(None, description="Роль пользователя")
-    user_id: Optional[int] = Field(None, description="ID пользователя")
-
-
-class TokenResponse(BaseModel):
-    """Ответ с токеном"""
-
-    access_token: str = Field(..., description="JWT токен доступа")
-    token_type: str = Field(default="bearer", description="Тип токена")
-    user_id: int = Field(..., description="ID пользователя")
-    role: str = Field(..., description="Роль пользователя")
-    login: str = Field(..., description="Логин пользователя")
-
-
-# Схемы для транзакций (недостающие)
-class TransactionCreateSchema(BaseModel):
-    """Схема создания транзакции"""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    city_id: int = Field(..., description="ID города", example=1)
-    transaction_type_id: int = Field(..., description="ID типа транзакции", example=1)
-    amount: Decimal = Field(..., description="Сумма транзакции", example=5000.00)
-    description: Optional[str] = Field(
-        None, description="Описание транзакции", example="Оплата за услуги"
-    )
-    transaction_date: date = Field(
-        ..., description="Дата транзакции", example="2025-01-15"
-    )
-
-
-class TransactionUpdateSchema(BaseModel):
-    """Схема обновления транзакции"""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    city_id: Optional[int] = Field(None, description="ID города")
-    transaction_type_id: Optional[int] = Field(None, description="ID типа транзакции")
-    amount: Optional[Decimal] = Field(None, description="Сумма транзакции")
-    description: Optional[str] = Field(None, description="Описание транзакции")
-    transaction_date: Optional[date] = Field(None, description="Дата транзакции")
