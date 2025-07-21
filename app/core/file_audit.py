@@ -168,7 +168,9 @@ class FileAuditLogger:
             return []
 
     @staticmethod
-    async def get_suspicious_activity(db: AsyncSession, limit: int = 100) -> list[FileAccessLog]:
+    async def get_suspicious_activity(
+        db: AsyncSession, limit: int = 100
+    ) -> list[FileAccessLog]:
         """Получить подозрительную активность"""
         try:
             result = await db.execute(

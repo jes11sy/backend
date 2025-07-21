@@ -1,6 +1,7 @@
 """
 Улучшенный middleware для обработки ошибок
 """
+
 # type: ignore
 
 import logging

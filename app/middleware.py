@@ -158,7 +158,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
             ErrorCode.FILE_TOO_LARGE: 413,
             ErrorCode.INVALID_FILE_TYPE: 415,
             ErrorCode.EXTERNAL_SERVICE_ERROR: 502,
-            ErrorCode.INTERNAL_ERROR: 503,  # вместо CACHE_ERROR  
+            ErrorCode.INTERNAL_ERROR: 503,  # вместо CACHE_ERROR
             ErrorCode.EXTERNAL_SERVICE_ERROR: 503,  # вместо EMAIL_SERVICE_ERROR
             ErrorCode.EXTERNAL_SERVICE_ERROR: 502,  # вместо NETWORK_ERROR
             ErrorCode.EXTERNAL_SERVICE_TIMEOUT: 504,  # вместо TIMEOUT_ERROR

@@ -329,10 +329,11 @@ def setup_api_documentation(app: FastAPI):
     """
     Настройка документации API
     """
+
     # Устанавливаем кастомную схему OpenAPI
     def custom_openapi():
         return get_custom_openapi_schema(app)
-    
+
     app.openapi = custom_openapi  # type: ignore[method-assign]
 
     # Добавляем примеры в схемы

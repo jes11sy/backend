@@ -34,7 +34,7 @@ except ImportError as e:
     import importlib
 
     from alembic import command
-    from alembic.config import Config  
+    from alembic.config import Config
     from alembic.script import ScriptDirectory
     from alembic.runtime.migration import MigrationContext
     from alembic.runtime.environment import EnvironmentContext
