@@ -229,7 +229,9 @@ class AdministratorSchema(BaseModel):
     )
     role_id: int = Field(..., description="ID роли", examples=5)
     status: UserStatus = Field(
-        default=UserStatus.ACTIVE, description="Статус администратора", examples="active"
+        default=UserStatus.ACTIVE,
+        description="Статус администратора",
+        examples="active",
     )
     login: str = Field(
         ..., max_length=100, description="Логин для входа", examples="admin"
@@ -350,7 +352,10 @@ class RequestCreateSchema(BaseModel):
         None, decimal_places=2, description="Результат работы (сумма)", examples=2500.00
     )
     expenses: Decimal = Field(
-        default=Decimal("0.00"), decimal_places=2, description="Расходы", examples=450.00
+        default=Decimal("0.00"),
+        decimal_places=2,
+        description="Расходы",
+        examples=450.00,
     )
     net_amount: Decimal = Field(
         default=Decimal("0.00"),
@@ -540,7 +545,9 @@ class TransactionCreateSchema(BaseModel):
         description="Примечания",
         examples="Закупка запчастей для ремонта кондиционеров",
     )
-    specified_date: date = Field(..., description="Дата операции", examples="2025-01-15")
+    specified_date: date = Field(
+        ..., description="Дата операции", examples="2025-01-15"
+    )
     payment_reason: Optional[str] = Field(
         None, description="Причина платежа", examples="Материалы для заявки #123"
     )
@@ -561,7 +568,9 @@ class TransactionResponseSchema(BaseModel):
     notes: Optional[str] = Field(
         None, description="Примечания", examples="Закупка запчастей"
     )
-    specified_date: date = Field(..., description="Дата операции", examples="2025-01-15")
+    specified_date: date = Field(
+        ..., description="Дата операции", examples="2025-01-15"
+    )
     payment_reason: Optional[str] = Field(
         None, description="Причина платежа", examples="Материалы для заявки #123"
     )
@@ -791,12 +800,14 @@ class HealthCheckResponse(BaseModel):
 # Недостающие схемы для совместимости
 class Token(BaseModel):
     """Схема токена"""
+
     access_token: str = Field(..., description="JWT токен доступа")
     token_type: str = Field(default="bearer", description="Тип токена")
 
 
 class TokenData(BaseModel):
-    """Данные токена"""  
+    """Данные токена"""
+
     login: Optional[str] = Field(None, description="Логин пользователя")
     role: Optional[str] = Field(None, description="Роль пользователя")
     user_id: Optional[int] = Field(None, description="ID пользователя")
@@ -804,13 +815,11 @@ class TokenData(BaseModel):
 
 class TransactionUpdateSchema(BaseModel):
     """Схема обновления транзакции"""
+
     model_config = ConfigDict(from_attributes=True)
-    
+
     city_id: Optional[int] = Field(None, description="ID города")
-    transaction_type_id: Optional[int] = Field(None, description="ID типа транзакции") 
+    transaction_type_id: Optional[int] = Field(None, description="ID типа транзакции")
     amount: Optional[Decimal] = Field(None, description="Сумма транзакции")
     description: Optional[str] = Field(None, description="Описание транзакции")
     transaction_date: Optional[date] = Field(None, description="Дата транзакции")
-
-
-
