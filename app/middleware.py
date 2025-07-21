@@ -237,7 +237,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self.requests = defaultdict(deque)
+        self.requests: defaultdict = defaultdict(deque)
         self.lock = asyncio.Lock()
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:

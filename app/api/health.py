@@ -143,7 +143,7 @@ class HealthChecker:
             duration = time.time() - start_time
 
             # Получаем информацию о кеше
-            cache_info = getattr(cache_manager, "get_info", lambda: {})()
+            cache_info: dict = getattr(cache_manager, "get_info", lambda: {})()
 
             details = {
                 "connection": "ok",

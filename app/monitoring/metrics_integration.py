@@ -375,7 +375,7 @@ class MetricsContext:
         self.context_name = context_name
         self.tags = tags or {}
         self.start_time = None
-        self.metrics_recorded = []
+        self.metrics_recorded: list = []
 
     def __enter__(self):
         self.start_time = time.time()

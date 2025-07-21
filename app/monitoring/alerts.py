@@ -440,7 +440,7 @@ class AlertManager:
     def get_alert_statistics(self) -> Dict[str, Any]:
         """Получение статистики алертов"""
         with self._lock:
-            active_by_severity = defaultdict(int)
+            active_by_severity: defaultdict = defaultdict(int)
             for alert in self.active_alerts.values():
                 active_by_severity[alert.severity.value] += 1
 

@@ -94,8 +94,8 @@ class ConnectionPoolMonitor:
         self._lock = threading.RLock()
 
         # Счетчики событий
-        self.connection_counters = defaultdict(int)
-        self.query_counters = defaultdict(int)
+        self.connection_counters: defaultdict = defaultdict(int)
+        self.query_counters: defaultdict = defaultdict(int)
 
         # Регистрируем метрики
         self._register_metrics()

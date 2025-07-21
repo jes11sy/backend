@@ -110,14 +110,14 @@ class RedisMonitor:
         self._lock = threading.RLock()
 
         # Счетчики операций
-        self.operation_counters = defaultdict(int)
-        self.error_counters = defaultdict(int)
+        self.operation_counters: defaultdict = defaultdict(int)
+        self.error_counters: defaultdict = defaultdict(int)
 
         # Регистрируем метрики
         self._register_metrics()
 
         # Предыдущие значения для вычисления дельт
-        self.previous_stats = {}
+        self.previous_stats: dict = {}
 
     def _register_metrics(self):
         """Регистрация метрик Redis"""
