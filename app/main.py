@@ -354,34 +354,45 @@ async def root():
 async def health_check():
     """Мгновенная проверка здоровья приложения для CI/CD"""
     return {
-        "status": "healthy", 
+        "status": "healthy",
         "app": "backend-api",
         "version": "1.0.0",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
+
 
 @app.get("/health/simple")
 async def simple_health():
     """Простейший health check без БД"""
     return {"status": "ok"}
 
-@app.get("/health/quick")  
+
+@app.get("/health/quick")
 async def quick_health():
     """Быстрая проверка с минимальной БД проверкой"""
     try:
         # Только проверяем что БД подключение существует
         from .core.database import engine
+
         # Не делаем никаких запросов, просто проверяем engine
         if engine:
             return {
                 "status": "healthy",
-                "database": "connected", 
-                "timestamp": datetime.utcnow().isoformat()
+                "database": "connected",
+                "timestamp": datetime.utcnow().isoformat(),
             }
         else:
-            return {"status": "healthy", "database": "not_configured", "timestamp": datetime.utcnow().isoformat()}
+            return {
+                "status": "healthy",
+                "database": "not_configured",
+                "timestamp": datetime.utcnow().isoformat(),
+            }
     except Exception as e:
-        return {"status": "healthy", "note": "app_running", "timestamp": datetime.utcnow().isoformat()}
+        return {
+            "status": "healthy",
+            "note": "app_running",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
 
 
 @app.get("/metrics/prometheus")
