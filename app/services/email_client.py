@@ -185,7 +185,7 @@ class RamblerEmailClient:
 
     def download_recordings(self, days_back: int = 1) -> List[dict]:
         """Скачивание записей звонков"""
-        downloaded_files = []
+        downloaded_files: List[dict] = []
 
         try:
             if not self.connect():
