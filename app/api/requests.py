@@ -1,44 +1,42 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, Response
+from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-import logging
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
+import logging
+import os
+from uuid import uuid4
+from datetime import datetime
+
 from ..core.database import get_db
 from ..core.auth import require_master, require_callcenter
+from ..core.config import settings
 from ..core.crud import (
     create_request, get_request, update_request, delete_request,
-    get_cities, get_request_types, get_directions, get_masters, get_advertising_campaigns, create_advertising_campaign
+    get_cities, get_request_types, get_directions, get_masters, 
+    get_advertising_campaigns, create_advertising_campaign
 )
 from ..core.optimized_crud import OptimizedRequestCRUD
 from ..monitoring.performance import (
     get_requests_optimized, get_request_optimized, performance_monitor,
     get_cities_cached, get_request_types_cached, get_directions_cached
 )
-from ..core.schemas import (
-    RequestCreate, RequestUpdate, RequestResponse,
-    CityResponse, RequestTypeResponse, DirectionResponse, MasterResponse, AdvertisingCampaignResponse, AdvertisingCampaignCreate
-)
+# Используем только enhanced_schemas для единообразия
 from ..core.enhanced_schemas import (
-    RequestCreateSchema, RequestUpdateSchema, RequestResponseSchema, 
-    CitySchema, ErrorResponse, ValidationErrorResponse
+    RequestCreateSchema as RequestCreate,
+    RequestUpdateSchema as RequestUpdate, 
+    RequestResponseSchema as RequestResponse,
+    CitySchema as CityResponse,
+    RequestTypeSchema as RequestTypeResponse,
+    DirectionSchema as DirectionResponse,
+    MasterSchema as MasterResponse,
+    AdvertisingCampaignSchema as AdvertisingCampaignResponse,
+    AdvertisingCampaignCreateSchema as AdvertisingCampaignCreate,
+    ErrorResponse, 
+    ValidationErrorResponse
 )
-from ..core.models import Master, Employee, Administrator, Request
-import os
-from uuid import uuid4
-from datetime import datetime
-from sqlalchemy.orm import selectinload
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
-from typing import List, Optional
-from ..core.crud import get_request_types
-from ..core.models import RequestType
-from ..core.models import Direction
-from ..core.models import AdvertisingCampaign
-from fastapi import Response
-from fastapi.responses import JSONResponse
-from fastapi.responses import PlainTextResponse
+from ..core.models import Master, Employee, Administrator, Request, RequestType, Direction, AdvertisingCampaign
 
 router = APIRouter(prefix="/requests", tags=["requests"])
 
@@ -68,7 +66,7 @@ async def get_masters_list(
         content=data,
         headers={
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Origin": settings.get_cors_origin_header(),
             "Access-Control-Allow-Credentials": "true"
         }
     )
@@ -81,7 +79,7 @@ async def get_masters_list_test():
         content=[{"id": 1, "full_name": "Test Master", "city_id": 1, "phone_number": "123", "login": "test", "status": "active", "created_at": "2025-01-01T00:00:00"}],
         headers={
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Origin": settings.get_cors_origin_header(),
             "Access-Control-Allow-Credentials": "true"
         }
     )
@@ -94,13 +92,13 @@ async def get_masters_simple():
 
 
 # Роуты для заявок
-@router.post("/", response_model=RequestResponseSchema, responses={
+@router.post("/", response_model=RequestResponse, responses={
     400: {"model": ErrorResponse, "description": "Некорректные данные"},
     401: {"model": ErrorResponse, "description": "Требуется аутентификация"},
     422: {"model": ValidationErrorResponse, "description": "Ошибка валидации"}
 })
 async def create_new_request(
-    request: RequestCreateSchema,
+    request: RequestCreate,
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_callcenter)
 ):
@@ -385,7 +383,7 @@ async def options_request(request_id: int):
     return JSONResponse(
         content={},
         headers={
-            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Origin": settings.get_cors_origin_header(),
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization",
             "Access-Control-Allow-Credentials": "true",
@@ -448,7 +446,7 @@ async def read_request(
         content=request_data,
         headers={
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Origin": settings.get_cors_origin_header(),
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -474,7 +472,6 @@ async def upload_bso_file(request_id: int, file: UploadFile = File(...), db: Asy
     with open(file_path, "wb") as f:
         f.write(content)
     # Обновляем заявку
-    from ..core.schemas import RequestUpdate
     from ..core.crud import update_request
     await update_request(db, request_id, RequestUpdate(bso_file_path=file_path))
     return {"file_path": file_path}
@@ -495,7 +492,6 @@ async def upload_expense_file(request_id: int, file: UploadFile = File(...), db:
     content = await file.read()
     with open(file_path, "wb") as f:
         f.write(content)
-    from ..core.schemas import RequestUpdate
     from ..core.crud import update_request
     await update_request(db, request_id, RequestUpdate(expense_file_path=file_path))
     return {"file_path": file_path}
@@ -516,7 +512,6 @@ async def upload_recording_file(request_id: int, file: UploadFile = File(...), d
     content = await file.read()
     with open(file_path, "wb") as f:
         f.write(content)
-    from ..core.schemas import RequestUpdate
     from ..core.crud import update_request
     await update_request(db, request_id, RequestUpdate(recording_file_path=file_path))
     return {"file_path": file_path}

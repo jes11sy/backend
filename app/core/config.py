@@ -142,6 +142,25 @@ class Settings(BaseSettings):
         # Для продакшена должны быть указаны конкретные origins
         return []
     
+    def get_cors_origin_header(self) -> str:
+        """Получить origin для CORS заголовков в ответах API"""
+        allowed_origins = self.get_allowed_origins()
+        
+        # Для разработки возвращаем localhost
+        if self.ENVIRONMENT == "development":
+            return "http://localhost:3000"
+        
+        # Для продакшена возвращаем первый разрешенный origin или fallback
+        if allowed_origins:
+            # Предпочитаем HTTPS origins
+            https_origins = [origin for origin in allowed_origins if origin.startswith("https://")]
+            if https_origins:
+                return https_origins[0]
+            return allowed_origins[0]
+        
+        # Fallback для продакшена
+        return "https://lead-schem.ru"
+    
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8"
@@ -179,12 +198,6 @@ class Settings(BaseSettings):
             # Проверяем энтропию ключа
             if self.SECRET_KEY.isalnum() or len(set(self.SECRET_KEY)) < 16:
                 print("⚠️  WARNING: SECRET_KEY appears to have low entropy. Use a cryptographically secure random key!")
-
-    jwt_secret_key: str = ""
-    letsencrypt_email: str = ""
-    cloudflare_email: str = ""
-    cloudflare_dns_api_token: str = ""
-    grafana_admin_password: str = ""
 
 
 settings = Settings() 

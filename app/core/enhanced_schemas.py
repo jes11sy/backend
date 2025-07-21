@@ -79,6 +79,15 @@ class TransactionTypeSchema(BaseModel):
     name: str = Field(..., max_length=50, description="Название типа транзакции", example="Расход")
 
 
+class AdvertisingCampaignCreateSchema(BaseModel):
+    """Схема создания рекламной кампании"""
+    model_config = ConfigDict(from_attributes=True)
+    
+    city_id: int = Field(..., description="ID города", example=1)
+    name: str = Field(..., max_length=200, description="Название кампании", example="Яндекс Директ - Ремонт кондиционеров")
+    phone_number: str = Field(..., max_length=20, description="Номер телефона кампании", example="+7 (999) 123-45-67")
+
+
 class AdvertisingCampaignSchema(BaseModel):
     """Схема рекламной кампании"""
     model_config = ConfigDict(from_attributes=True)
@@ -514,4 +523,56 @@ class HealthCheckResponse(BaseModel):
     timestamp: str = Field(..., description="Время проверки", example="2025-01-15T15:00:00Z")
     service: str = Field(..., description="Название сервиса", example="Request Management System")
     version: str = Field(..., description="Версия системы", example="1.0.0")
-    checks: Optional[dict] = Field(None, description="Детальные проверки компонентов") 
+    checks: Optional[dict] = Field(None, description="Детальные проверки компонентов")
+
+
+# Authentication schemas для совместимости
+class UserLogin(BaseModel):
+    """Схема входа пользователя"""
+    login: str = Field(..., description="Логин пользователя", example="admin")
+    password: str = Field(..., description="Пароль пользователя", example="password123")
+
+
+class Token(BaseModel):
+    """Схема токена"""
+    access_token: str = Field(..., description="JWT токен")
+    token_type: str = Field(default="bearer", description="Тип токена")
+
+
+class TokenData(BaseModel):
+    """Данные токена"""
+    login: Optional[str] = Field(None, description="Логин пользователя")
+    role: Optional[str] = Field(None, description="Роль пользователя")
+    user_id: Optional[int] = Field(None, description="ID пользователя")
+
+
+class TokenResponse(BaseModel):
+    """Ответ с токеном"""
+    access_token: str = Field(..., description="JWT токен доступа")
+    token_type: str = Field(default="bearer", description="Тип токена")
+    user_id: int = Field(..., description="ID пользователя")
+    role: str = Field(..., description="Роль пользователя")
+    login: str = Field(..., description="Логин пользователя")
+
+
+# Схемы для транзакций (недостающие)
+class TransactionCreateSchema(BaseModel):
+    """Схема создания транзакции"""
+    model_config = ConfigDict(from_attributes=True)
+    
+    city_id: int = Field(..., description="ID города", example=1)
+    transaction_type_id: int = Field(..., description="ID типа транзакции", example=1)
+    amount: Decimal = Field(..., description="Сумма транзакции", example=5000.00)
+    description: Optional[str] = Field(None, description="Описание транзакции", example="Оплата за услуги")
+    transaction_date: date = Field(..., description="Дата транзакции", example="2025-01-15")
+
+
+class TransactionUpdateSchema(BaseModel):
+    """Схема обновления транзакции"""
+    model_config = ConfigDict(from_attributes=True)
+    
+    city_id: Optional[int] = Field(None, description="ID города")
+    transaction_type_id: Optional[int] = Field(None, description="ID типа транзакции")
+    amount: Optional[Decimal] = Field(None, description="Сумма транзакции")
+    description: Optional[str] = Field(None, description="Описание транзакции")
+    transaction_date: Optional[date] = Field(None, description="Дата транзакции") 

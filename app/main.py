@@ -203,13 +203,10 @@ app = FastAPI(
 
 # ВКЛЮЧАЕМ CORS MIDDLEWARE ПЕРВЫМ!
 from .core.config import settings
-cors_origins = settings.get_allowed_origins
+cors_origins = settings.get_allowed_origins()
 # Добавляем основные домены если не настроены через env
 if not cors_origins:
     cors_origins = ["http://localhost:3000", "https://lead-schem.ru", "https://www.lead-schem.ru"]
-
-# Всегда включаем основные продакшн домены
-cors_origins = list(set(cors_origins + ["https://lead-schem.ru", "https://www.lead-schem.ru"]))
 
 logger.info(f"CORS origins configured: {cors_origins}")
 
@@ -224,21 +221,32 @@ app.add_middleware(
 # Настройка интерактивной документации
 setup_api_documentation(app)
 
-# Включаем только необходимые middleware
+# ОПТИМИЗИРОВАННЫЙ ПОРЯДОК MIDDLEWARE (важен порядок!)
+# 1. Первым добавляем метрики (для измерения всего пайплайна)
+app.add_middleware(MetricsMiddleware, collector=performance_collector)
+
+# 2. Обработка ошибок должна быть рано в пайплайне
 app.add_middleware(ErrorHandlingMiddleware)
-app.add_middleware(RequestLoggingMiddleware)
+
+# 3. Безопасность и ограничения размера
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestSizeLimitMiddleware, max_size=10 * 1024 * 1024)  # 10MB
-# app.add_middleware(CSRFMiddleware)  # Отключаем CSRF пока
+
+# 4. Rate limiting (после проверок безопасности)
 app.add_middleware(
     RateLimitMiddleware,
     max_requests=settings.RATE_LIMIT_PER_MINUTE,
     window_seconds=60
 )
-# Добавляем кеширование для GET запросов
+
+# 5. Кеширование (перед логированием для оптимизации)
 app.add_middleware(CacheMiddleware, cache_ttl=settings.CACHE_TTL)
-# Добавляем middleware для сбора метрик
-app.middleware("http")(MetricsMiddleware(performance_collector))
+
+# 6. Логирование запросов (последним, чтобы логировать все)
+app.add_middleware(RequestLoggingMiddleware)
+
+# 7. CSRF middleware (отключен пока)
+# app.add_middleware(CSRFMiddleware)
 
 # Подключение статических файлов
 if os.path.exists("media"):

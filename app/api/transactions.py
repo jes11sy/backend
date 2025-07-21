@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from ..core.database import get_db
 from ..core.auth import require_master, get_current_active_user, require_callcenter
+from ..core.config import settings
 from ..core.crud import (
     create_transaction, get_transaction, update_transaction, delete_transaction,
     get_cities, get_transaction_types
@@ -131,7 +132,7 @@ async def get_cities_list(
         content=cities_data,
         headers={
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Origin": settings.get_cors_origin_header(),
             "Access-Control-Allow-Credentials": "true"
         }
     )
@@ -156,7 +157,7 @@ async def get_transaction_types_list(
         content=types_data,
         headers={
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Origin": settings.get_cors_origin_header(),
             "Access-Control-Allow-Credentials": "true"
         }
     )
@@ -206,7 +207,7 @@ async def upload_transaction_file(
                 "file_path": file_path
             },
             headers={
-                "Access-Control-Allow-Origin": "http://localhost:3000",
+                "Access-Control-Allow-Origin": settings.get_cors_origin_header(),
                 "Access-Control-Allow-Credentials": "true"
             }
         )
