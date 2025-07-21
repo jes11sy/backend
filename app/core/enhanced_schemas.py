@@ -45,9 +45,9 @@ class CitySchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(..., description="Уникальный идентификатор города", examples=1)
+    id: int = Field(..., description="Уникальный идентификатор города", examples=[1])
     name: str = Field(
-        ..., max_length=100, description="Название города", examples="Москва"
+        ..., max_length=100, description="Название города", examples=["Москва"]
     )
 
 
