@@ -487,7 +487,7 @@ async def update_request(
                         if hasattr(db_request, "updated_at") and db_request.updated_at
                         else db_request.created_at.date()
                     )
-                    transaction.notes = f"Приход по заявке {request_id}"
+                    transaction.notes = f"Приход по заявке {request_id}"  # type: ignore[assignment]
                 else:
                     # Создаём новую транзакцию
                     from .schemas import TransactionCreate

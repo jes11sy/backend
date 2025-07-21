@@ -607,7 +607,7 @@ async def upload_bso_file(
     # Обновляем заявку
     from ..core.crud import update_request
 
-    await update_request(db, request_id, RequestUpdate(bso_file_path=file_path))
+    await update_request(db, request_id, RequestUpdate(bso_file_path=file_path))  # type: ignore
     return {"file_path": file_path}
 
 
@@ -631,7 +631,7 @@ async def upload_expense_file(
         f.write(content)
     from ..core.crud import update_request
 
-    await update_request(db, request_id, RequestUpdate(expense_file_path=file_path))
+    await update_request(db, request_id, RequestUpdate(expense_file_path=file_path))  # type: ignore
     return {"file_path": file_path}
 
 
@@ -655,5 +655,5 @@ async def upload_recording_file(
         f.write(content)
     from ..core.crud import update_request
 
-    await update_request(db, request_id, RequestUpdate(recording_file_path=file_path))
+    await update_request(db, request_id, RequestUpdate(recording_file_path=file_path))  # type: ignore
     return {"file_path": file_path}

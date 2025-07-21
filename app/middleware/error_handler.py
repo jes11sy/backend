@@ -84,10 +84,10 @@ class ErrorHandlingMiddleware:
 
         # Обработка HTTP исключений
         elif isinstance(exc, (HTTPException, StarletteHTTPException)):
-            if exc.status_code == 401:
-                auth_error = AuthenticationError(exc.detail)
-            elif exc.status_code == 403:
-                auth_error = AuthorizationError(exc.detail)
+                    if exc.status_code == 401:
+            auth_error = AuthenticationError(exc.detail)
+        elif exc.status_code == 403:
+            auth_error = AuthorizationError(exc.detail)  # type: ignore[assignment]
             elif exc.status_code == 429:
                 rate_limit_error = RateLimitExceededError(exc.detail)
                 return create_error_response(rate_limit_error, context)
@@ -134,9 +134,9 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 
     # Получаем пользователя из токена если есть
     try:
-        from ..core.auth import get_current_user_optional
+        from ..core.auth import get_current_user
 
-        user = await get_current_user_optional(request)
+        user = await get_current_user(request)
         if user:
             error_context.user_id = str(user.id)
     except Exception:

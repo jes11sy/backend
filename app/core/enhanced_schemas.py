@@ -460,6 +460,13 @@ class RequestUpdateSchema(BaseModel):
     avito_chat_id: Optional[str] = Field(
         None, max_length=100, description="ID чата Avito"
     )
+    
+    # Пути к файлам
+    bso_file_path: Optional[str] = Field(None, description="Путь к файлу БСО")
+    expense_file_path: Optional[str] = Field(None, description="Путь к файлу расходов")
+    recording_file_path: Optional[str] = Field(
+        None, description="Путь к записи разговора"
+    )
 
 
 class RequestResponseSchema(BaseModel):
