@@ -20,6 +20,7 @@ import weakref
 from sqlalchemy import text, func, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.database import get_db
 from app.core.models import (
@@ -641,14 +642,17 @@ class PerformanceMetricsCollector:
         self.metrics.increment("cache_misses")
 
 
-class MetricsMiddleware:
+class MetricsMiddleware(BaseHTTPMiddleware):
     """Middleware для сбора метрик HTTP запросов"""
 
-    def __init__(self, app, performance_collector: PerformanceMetricsCollector):
-        self.app = app
+    def __init__(self, app, performance_collector: PerformanceMetricsCollector = None):
+        super().__init__(app)
+        if performance_collector is None:
+            from app.monitoring.metrics import performance_collector as default_collector
+            performance_collector = default_collector
         self.performance_collector = performance_collector
 
-    async def __call__(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next):
         start_time = time.time()
 
         response = await call_next(request)
