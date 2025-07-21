@@ -1,6 +1,7 @@
 """
 Middleware для обработки ошибок и других функций
 """
+
 import logging
 import time
 import traceback
@@ -21,7 +22,7 @@ from .core.exceptions import (
     AuthenticationError,
     AuthorizationError,
     handle_database_exception,
-    ErrorCode
+    ErrorCode,
 )
 import asyncio
 from collections import defaultdict, deque
@@ -32,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 class ErrorHandlingMiddleware(BaseHTTPMiddleware):
     """Middleware для централизованной обработки ошибок с улучшенным error handling"""
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         try:
             response = await call_next(request)
@@ -40,16 +41,20 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
         except BaseApplicationError as e:
             # Обработка наших структурированных исключений
             logger.error(f"Application error: {e.to_dict()}")
-            
+
             status_code = self._get_status_code_for_error(e.error_code)
             return JSONResponse(
                 status_code=status_code,
                 content={
                     "error": e.error_code.value,
                     "message": e.message,
-                    "details": e.details if settings.ENVIRONMENT == "development" else {},
-                    "context": e.context if settings.ENVIRONMENT == "development" else {}
-                }
+                    "details": (
+                        e.details if settings.ENVIRONMENT == "development" else {}
+                    ),
+                    "context": (
+                        e.context if settings.ENVIRONMENT == "development" else {}
+                    ),
+                },
             )
         except HTTPException as e:
             # Обработка FastAPI HTTPException
@@ -59,66 +64,79 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": "HTTP_ERROR",
                     "message": e.detail,
-                    "details": {"status_code": e.status_code}
-                }
+                    "details": {"status_code": e.status_code},
+                },
             )
         except SQLAlchemyError as e:
             # Обработка ошибок SQLAlchemy
             db_error = handle_database_exception(e, "database_operation")
             logger.error(f"Database error: {db_error.to_dict()}")
-            
+
             return JSONResponse(
                 status_code=500,
                 content={
                     "error": "DATABASE_ERROR",
                     "message": "Database operation failed",
-                    "details": db_error.details if settings.ENVIRONMENT == "development" else {}
-                }
+                    "details": (
+                        db_error.details
+                        if settings.ENVIRONMENT == "development"
+                        else {}
+                    ),
+                },
             )
         except ValueError as e:
             # Обработка ошибок валидации
             logger.warning(f"Validation error: {str(e)}")
             logger.warning(f"Request: {request.method} {request.url}")
-            
+
             return JSONResponse(
                 status_code=400,
                 content={
                     "error": "VALIDATION_ERROR",
                     "message": "Invalid input data",
-                    "details": {"original_error": str(e)} if settings.ENVIRONMENT == "development" else {}
-                }
+                    "details": (
+                        {"original_error": str(e)}
+                        if settings.ENVIRONMENT == "development"
+                        else {}
+                    ),
+                },
             )
         except asyncio.TimeoutError as e:
             # Обработка таймаутов
             logger.error(f"Timeout error: {str(e)}")
             logger.error(f"Request: {request.method} {request.url}")
-            
+
             return JSONResponse(
                 status_code=504,
                 content={
                     "error": "TIMEOUT_ERROR",
                     "message": "Request timeout",
-                    "details": {"timeout_type": "request"} if settings.ENVIRONMENT == "development" else {}
-                }
+                    "details": (
+                        {"timeout_type": "request"}
+                        if settings.ENVIRONMENT == "development"
+                        else {}
+                    ),
+                },
             )
         except Exception as e:
             # Обработка всех остальных исключений
             logger.error(f"Unhandled exception: {str(e)}")
             logger.error(f"Request: {request.method} {request.url}")
             logger.error(f"Traceback: {traceback.format_exc()}")
-            
+
             return JSONResponse(
                 status_code=500,
                 content={
                     "error": "INTERNAL_SERVER_ERROR",
                     "message": "An unexpected error occurred",
-                    "details": {
-                        "error_type": type(e).__name__,
-                        "error_message": str(e)
-                    } if settings.ENVIRONMENT == "development" else {}
-                }
+                    "details": (
+                        {"error_type": type(e).__name__, "error_message": str(e)}
+                        if settings.ENVIRONMENT == "development"
+                        else {}
+                    ),
+                },
             )
-    
+
     def _get_status_code_for_error(self, error_code: ErrorCode) -> int:
         """Получение HTTP статус кода для типа ошибки"""
         status_mapping = {
@@ -152,24 +170,24 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Middleware для логирования запросов"""
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         start_time = time.time()
-        
+
         # Получаем IP адрес клиента
         client_ip = request.client.host if request.client else "unknown"
         if "x-forwarded-for" in request.headers:
             client_ip = request.headers["x-forwarded-for"].split(",")[0].strip()
-        
+
         # Логируем начало запроса
         logger.info(f"Request started: {request.method} {request.url} from {client_ip}")
-        
+
         try:
             response = await call_next(request)
-            
+
             # Вычисляем время выполнения
             duration = time.time() - start_time
-            
+
             # Логируем завершение запроса
             logger.info(
                 f"Request completed: {request.method} {request.url} "
@@ -177,9 +195,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 f"- Duration: {duration:.3f}s "
                 f"- IP: {client_ip}"
             )
-            
+
             return response
-            
+
         except Exception as e:
             # Логируем ошибку
             duration = time.time() - start_time
@@ -194,45 +212,49 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Middleware для добавления заголовков безопасности"""
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         response = await call_next(request)
-        
+
         # Добавляем заголовки безопасности
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        
+
         if settings.ENVIRONMENT == "production":
-            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains"
+            )
+
         return response
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Middleware для ограничения частоты запросов"""
-    
+
     def __init__(self, app: ASGIApp, max_requests: int = 100, window_seconds: int = 60):
         super().__init__(app)
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.requests = defaultdict(deque)
         self.lock = asyncio.Lock()
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         client_ip = request.client.host if request.client else "unknown"
         if "x-forwarded-for" in request.headers:
             client_ip = request.headers["x-forwarded-for"].split(",")[0].strip()
-        
+
         current_time = time.time()
-        
+
         async with self.lock:
             # Очищаем старые запросы
             window_start = current_time - self.window_seconds
-            while self.requests[client_ip] and self.requests[client_ip][0] < window_start:
+            while (
+                self.requests[client_ip] and self.requests[client_ip][0] < window_start
+            ):
                 self.requests[client_ip].popleft()
-            
+
             # Проверяем лимит
             if len(self.requests[client_ip]) >= self.max_requests:
                 logger.warning(f"Rate limit exceeded for IP: {client_ip}")
@@ -243,32 +265,32 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                         "message": "Too many requests",
                         "details": {
                             "max_requests": self.max_requests,
-                            "window_seconds": self.window_seconds
-                        }
-                    }
+                            "window_seconds": self.window_seconds,
+                        },
+                    },
                 )
-            
+
             # Добавляем текущий запрос
             self.requests[client_ip].append(current_time)
-        
+
         return await call_next(request)
 
 
 class CacheMiddleware(BaseHTTPMiddleware):
     """Middleware для кеширования GET запросов"""
-    
+
     def __init__(self, app: ASGIApp, cache_ttl: int = 300):
         super().__init__(app)
         self.cache_ttl = cache_ttl
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Кешируем только GET запросы
         if request.method != "GET":
             return await call_next(request)
-        
+
         # Создаем ключ кеша
         cache_key = f"http_cache:{request.url}"
-        
+
         try:
             # Проверяем кеш
             cached_response = await cache_manager.get(cache_key)
@@ -277,34 +299,34 @@ class CacheMiddleware(BaseHTTPMiddleware):
                 return JSONResponse(
                     status_code=cached_response["status_code"],
                     content=cached_response["content"],
-                    headers=cached_response.get("headers", {})
+                    headers=cached_response.get("headers", {}),
                 )
-            
+
             # Выполняем запрос
             response = await call_next(request)
-            
+
             # Кешируем только успешные ответы
             if response.status_code == 200:
                 # Читаем тело ответа
                 body = b""
                 async for chunk in response.body_iterator:
                     body += chunk
-                
+
                 try:
                     content = json.loads(body.decode())
                     cache_data = {
                         "status_code": response.status_code,
                         "content": content,
-                        "headers": dict(response.headers)
+                        "headers": dict(response.headers),
                     }
                     await cache_manager.set(cache_key, cache_data, ttl=self.cache_ttl)
                     logger.debug(f"Cached response for {request.url}")
-                    
+
                     # Возвращаем новый ответ с прочитанным телом
                     return JSONResponse(
                         status_code=response.status_code,
                         content=content,
-                        headers=dict(response.headers)
+                        headers=dict(response.headers),
                     )
                 except (json.JSONDecodeError, UnicodeDecodeError):
                     # Не кешируем если не можем декодировать, возвращаем оригинальный ответ
@@ -312,11 +334,13 @@ class CacheMiddleware(BaseHTTPMiddleware):
                         content=body,
                         status_code=response.status_code,
                         headers=dict(response.headers),
-                        media_type=response.headers.get("content-type", "application/octet-stream")
+                        media_type=response.headers.get(
+                            "content-type", "application/octet-stream"
+                        ),
                     )
-            
+
             return response
-            
+
         except Exception as e:
             logger.error(f"Cache middleware error: {e}")
             # При ошибке кеша просто выполняем запрос

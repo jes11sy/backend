@@ -22,7 +22,7 @@ engine = create_async_engine(
     pool_timeout=settings.DB_POOL_TIMEOUT,  # Таймаут ожидания соединения
     pool_recycle=settings.DB_POOL_RECYCLE,  # Время жизни соединения (3600 = 1 час)
     pool_pre_ping=True,  # Проверка соединения перед использованием
-    pool_reset_on_return='commit',  # Сброс состояния при возврате соединения
+    pool_reset_on_return="commit",  # Сброс состояния при возврате соединения
     # Настройки для PostgreSQL
     connect_args={
         "server_settings": {
@@ -36,7 +36,7 @@ engine = create_async_engine(
         },
         "command_timeout": 30,  # Таймаут команд
         "prepared_statement_cache_size": 0,  # Отключаем кеш prepared statements для стабильности
-    }
+    },
 )
 
 # Создание фабрики сессий с оптимизированными настройками
@@ -45,7 +45,7 @@ AsyncSessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
     autoflush=False,  # Отключаем автоматический flush для лучшего контроля
-    autocommit=False
+    autocommit=False,
 )
 
 # Базовый класс для моделей
@@ -55,20 +55,22 @@ Base = declarative_base()
 # Статистика пула соединений
 class ConnectionPoolStats:
     """Класс для сбора статистики пула соединений"""
-    
+
     @staticmethod
     def get_pool_stats():
         """Получение статистики пула соединений"""
         pool = engine.pool
         return {
-            "size": getattr(pool, 'size', lambda: 0)(),
-            "checked_out": getattr(pool, 'checkedout', lambda: 0)(),
-            "overflow": getattr(pool, 'overflow', lambda: 0)(),
-            "invalid": getattr(pool, 'invalid', lambda: 0)(),
-            "total_connections": getattr(pool, 'size', lambda: 0)() + getattr(pool, 'overflow', lambda: 0)(),
-            "available_connections": getattr(pool, 'size', lambda: 0)() - getattr(pool, 'checkedout', lambda: 0)()
+            "size": getattr(pool, "size", lambda: 0)(),
+            "checked_out": getattr(pool, "checkedout", lambda: 0)(),
+            "overflow": getattr(pool, "overflow", lambda: 0)(),
+            "invalid": getattr(pool, "invalid", lambda: 0)(),
+            "total_connections": getattr(pool, "size", lambda: 0)()
+            + getattr(pool, "overflow", lambda: 0)(),
+            "available_connections": getattr(pool, "size", lambda: 0)()
+            - getattr(pool, "checkedout", lambda: 0)(),
         }
-    
+
     @staticmethod
     def log_pool_stats():
         """Логирование статистики пула"""
@@ -113,7 +115,7 @@ def receive_invalidate(dbapi_connection, connection_record, exception):
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency для получения сессии базы данных
-    
+
     Включает:
     - Автоматическое управление транзакциями
     - Обработку ошибок соединения
@@ -122,25 +124,25 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     session = None
     start_time = asyncio.get_event_loop().time()
-    
+
     try:
         session = AsyncSessionLocal()
         logger.debug("Database session created")
-        
+
         yield session
-        
+
         # Если не было исключений, коммитим транзакцию
         if session.in_transaction():
             await session.commit()
             logger.debug("Transaction committed")
-            
+
     except Exception as e:
         # В случае ошибки откатываем транзакцию
         if session and session.in_transaction():
             await session.rollback()
             logger.error(f"Transaction rolled back due to error: {e}")
         raise
-        
+
     finally:
         # Всегда закрываем сессию
         if session:
@@ -157,22 +159,22 @@ async def check_database_health() -> dict:
             # Простой запрос для проверки соединения
             result = await session.execute(text("SELECT 1"))
             await session.commit()
-            
+
             # Получаем статистику пула
             pool_stats = ConnectionPoolStats.get_pool_stats()
-            
+
             return {
                 "status": "healthy",
                 "connection_test": "passed",
-                "pool_stats": pool_stats
+                "pool_stats": pool_stats,
             }
-            
+
     except Exception as e:
         logger.error(f"Database health check failed: {e}")
         return {
             "status": "unhealthy",
             "error": str(e),
-            "pool_stats": ConnectionPoolStats.get_pool_stats()
+            "pool_stats": ConnectionPoolStats.get_pool_stats(),
         }
 
 
@@ -185,9 +187,9 @@ async def optimize_database_performance():
                 # Оптимизации для PostgreSQL
                 await session.execute(text("ANALYZE;"))  # Обновляем статистику
                 logger.info("Database statistics updated")
-                
+
             await session.commit()
-            
+
     except Exception as e:
         logger.error(f"Database optimization failed: {e}")
 
@@ -199,21 +201,27 @@ async def monitor_slow_queries():
         async with AsyncSessionLocal() as session:
             if settings.DATABASE_URL.startswith("postgresql"):
                 # Запрос для получения медленных запросов
-                slow_queries = await session.execute(text("""
+                slow_queries = await session.execute(
+                    text(
+                        """
                     SELECT query, mean_time, calls, total_time
                     FROM pg_stat_statements
                     WHERE mean_time > 1000  -- запросы дольше 1 секунды
                     ORDER BY mean_time DESC
                     LIMIT 10;
-                """))
-                
+                """
+                    )
+                )
+
                 for query in slow_queries:
                     logger.warning(f"Slow query detected: {query}")
-                    
+
             await session.commit()
-            
+
     except Exception as e:
-        logger.debug(f"Slow query monitoring failed (this is normal if pg_stat_statements is not enabled): {e}")
+        logger.debug(
+            f"Slow query monitoring failed (this is normal if pg_stat_statements is not enabled): {e}"
+        )
 
 
 # Функция для очистки соединений
@@ -223,7 +231,7 @@ async def cleanup_connections():
         # Закрываем все соединения в пуле
         await engine.dispose()
         logger.info("Database connections cleaned up")
-        
+
     except Exception as e:
         logger.error(f"Database cleanup failed: {e}")
 
@@ -236,15 +244,15 @@ async def monitor_connection_pool():
             # Логируем статистику каждые 5 минут
             await asyncio.sleep(300)
             ConnectionPoolStats.log_pool_stats()
-            
+
             # Проверяем здоровье базы данных
             health = await check_database_health()
             if health["status"] != "healthy":
                 logger.error(f"Database health check failed: {health}")
-                
+
         except asyncio.CancelledError:
             logger.info("Connection pool monitoring stopped")
             break
         except Exception as e:
             logger.error(f"Connection pool monitoring error: {e}")
-            await asyncio.sleep(60)  # Ждем минуту перед повторной попыткой 
+            await asyncio.sleep(60)  # Ждем минуту перед повторной попыткой

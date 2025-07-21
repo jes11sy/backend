@@ -1,6 +1,7 @@
 """
 Интерактивная документация API с примерами
 """
+
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from typing import Dict, Any
@@ -13,7 +14,7 @@ def get_custom_openapi_schema(app: FastAPI) -> Dict[str, Any]:
     """
     if app.openapi_schema:
         return app.openapi_schema
-    
+
     openapi_schema = get_openapi(
         title="Система управления заявками - API",
         version="1.0.0",
@@ -82,57 +83,42 @@ API использует JWT токены для аутентификации. �
         routes=app.routes,
         servers=[
             {"url": "http://localhost:8000", "description": "Development server"},
-            {"url": "https://api.yourdomain.com", "description": "Production server"}
+            {"url": "https://api.yourdomain.com", "description": "Production server"},
         ],
         tags=[
             {
                 "name": "authentication",
-                "description": "🔐 Аутентификация и авторизация пользователей"
+                "description": "🔐 Аутентификация и авторизация пользователей",
             },
-            {
-                "name": "requests",
-                "description": "📞 Управление заявками клиентов"
-            },
-            {
-                "name": "transactions",
-                "description": "💰 Финансовые транзакции"
-            },
+            {"name": "requests", "description": "📞 Управление заявками клиентов"},
+            {"name": "transactions", "description": "💰 Финансовые транзакции"},
             {
                 "name": "users",
-                "description": "👥 Управление пользователями (мастера, сотрудники, администраторы)"
+                "description": "👥 Управление пользователями (мастера, сотрудники, администраторы)",
             },
-            {
-                "name": "files",
-                "description": "📁 Загрузка и управление файлами"
-            },
-            {
-                "name": "health",
-                "description": "❤️ Мониторинг здоровья системы"
-            },
+            {"name": "files", "description": "📁 Загрузка и управление файлами"},
+            {"name": "health", "description": "❤️ Мониторинг здоровья системы"},
             {
                 "name": "database",
-                "description": "🗄️ Мониторинг и оптимизация базы данных"
+                "description": "🗄️ Мониторинг и оптимизация базы данных",
             },
-            {
-                "name": "recordings",
-                "description": "🎵 Записи телефонных разговоров"
-            }
-        ]
+            {"name": "recordings", "description": "🎵 Записи телефонных разговоров"},
+        ],
     )
-    
+
     # Добавляем компоненты безопасности
     openapi_schema["components"]["securitySchemes"] = {
         "cookieAuth": {
             "type": "apiKey",
             "in": "cookie",
             "name": "access_token",
-            "description": "JWT токен в httpOnly cookie"
+            "description": "JWT токен в httpOnly cookie",
         }
     }
-    
+
     # Добавляем глобальную безопасность
     openapi_schema["security"] = [{"cookieAuth": []}]
-    
+
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
@@ -142,26 +128,17 @@ API_EXAMPLES = {
     "auth_login": {
         "summary": "Вход в систему",
         "description": "Аутентификация пользователя с получением JWT токена",
-        "value": {
-            "login": "master001",
-            "password": "secure_password123"
-        }
+        "value": {"login": "master001", "password": "secure_password123"},
     },
     "auth_login_employee": {
         "summary": "Вход сотрудника колл-центра",
         "description": "Аутентификация сотрудника с ролью callcenter",
-        "value": {
-            "login": "callcenter_user",
-            "password": "employee_pass456"
-        }
+        "value": {"login": "callcenter_user", "password": "employee_pass456"},
     },
     "auth_login_admin": {
         "summary": "Вход администратора",
         "description": "Аутентификация администратора системы",
-        "value": {
-            "login": "admin",
-            "password": "admin_secure789"
-        }
+        "value": {"login": "admin", "password": "admin_secure789"},
     },
     "request_create": {
         "summary": "Создание новой заявки",
@@ -179,8 +156,8 @@ API_EXAMPLES = {
             "advertising_campaign_id": 1,
             "ats_number": "ATS-2025-001",
             "call_center_name": "Петрова Анна",
-            "call_center_notes": "Клиент очень вежливый, просит перезвонить после 15:00"
-        }
+            "call_center_notes": "Клиент очень вежливый, просит перезвонить после 15:00",
+        },
     },
     "request_create_minimal": {
         "summary": "Минимальная заявка",
@@ -189,8 +166,8 @@ API_EXAMPLES = {
             "city_id": 1,
             "request_type_id": 2,
             "client_phone": "+7 (999) 987-65-43",
-            "client_name": "Петров Петр"
-        }
+            "client_name": "Петров Петр",
+        },
     },
     "request_update": {
         "summary": "Обновление заявки",
@@ -201,8 +178,8 @@ API_EXAMPLES = {
             "result": 2500.00,
             "expenses": 450.00,
             "net_amount": 2050.00,
-            "master_handover": 1230.00
-        }
+            "master_handover": 1230.00,
+        },
     },
     "transaction_create": {
         "summary": "Создание транзакции",
@@ -213,8 +190,8 @@ API_EXAMPLES = {
             "amount": 15000.50,
             "notes": "Закупка запчастей для ремонта кондиционеров",
             "specified_date": "2025-01-15",
-            "payment_reason": "Материалы для заявки #123"
-        }
+            "payment_reason": "Материалы для заявки #123",
+        },
     },
     "master_create": {
         "summary": "Создание мастера",
@@ -228,8 +205,8 @@ API_EXAMPLES = {
             "login": "master_sidorov",
             "password": "secure_pass123",
             "chat_id": "telegram_123456789",
-            "notes": "Специализация: кондиционеры, стаж 8 лет"
-        }
+            "notes": "Специализация: кондиционеры, стаж 8 лет",
+        },
     },
     "employee_create": {
         "summary": "Создание сотрудника",
@@ -240,14 +217,14 @@ API_EXAMPLES = {
             "city_id": 1,
             "login": "maria_kozlova",
             "password": "employee_pass456",
-            "notes": "Опыт работы в колл-центре 3 года"
-        }
+            "notes": "Опыт работы в колл-центре 3 года",
+        },
     },
     "file_upload": {
         "summary": "Загрузка файла",
         "description": "Загрузка документа или изображения",
-        "value": "Выберите файл (JPG, PNG, PDF, DOC, DOCX до 10MB)"
-    }
+        "value": "Выберите файл (JPG, PNG, PDF, DOC, DOCX до 10MB)",
+    },
 }
 
 # Описания статусов ответов
@@ -260,7 +237,7 @@ RESPONSE_DESCRIPTIONS = {
     404: "Ресурс не найден",
     422: "Ошибка валидации данных",
     429: "Превышен лимит запросов",
-    500: "Внутренняя ошибка сервера"
+    500: "Внутренняя ошибка сервера",
 }
 
 # Примеры ответов
@@ -273,14 +250,12 @@ RESPONSE_EXAMPLES = {
             "user_type": "master",
             "role": "master",
             "user_id": 1,
-            "city_id": 1
-        }
+            "city_id": 1,
+        },
     },
     "auth_error": {
         "summary": "Ошибка аутентификации",
-        "value": {
-            "detail": "Incorrect login or password"
-        }
+        "value": {"detail": "Incorrect login or password"},
     },
     "request_response": {
         "summary": "Информация о заявке",
@@ -294,21 +269,15 @@ RESPONSE_EXAMPLES = {
             "meeting_date": "2025-01-20T14:30:00",
             "status": "Новая",
             "created_at": "2025-01-15T10:30:00",
-            "city": {
-                "id": 1,
-                "name": "Москва"
-            },
-            "request_type": {
-                "id": 1,
-                "name": "Ремонт кондиционера"
-            },
+            "city": {"id": 1, "name": "Москва"},
+            "request_type": {"id": 1, "name": "Ремонт кондиционера"},
             "master": {
                 "id": 1,
                 "full_name": "Сидоров Алексей Владимирович",
-                "phone_number": "+7 (999) 555-12-34"
+                "phone_number": "+7 (999) 555-12-34",
             },
-            "files": []
-        }
+            "files": [],
+        },
     },
     "validation_error": {
         "summary": "Ошибка валидации",
@@ -317,15 +286,15 @@ RESPONSE_EXAMPLES = {
                 {
                     "loc": ["body", "city_id"],
                     "msg": "field required",
-                    "type": "value_error.missing"
+                    "type": "value_error.missing",
                 },
                 {
                     "loc": ["body", "client_phone"],
                     "msg": "ensure this value has at most 20 characters",
-                    "type": "value_error.any_str.max_length"
-                }
+                    "type": "value_error.any_str.max_length",
+                },
             ]
-        }
+        },
     },
     "health_check": {
         "summary": "Статус здоровья системы",
@@ -338,21 +307,21 @@ RESPONSE_EXAMPLES = {
                 "database": {
                     "status": "healthy",
                     "response_time_ms": 12,
-                    "details": "Connection pool: 8/10 active"
+                    "details": "Connection pool: 8/10 active",
                 },
                 "file_storage": {
                     "status": "healthy",
                     "response_time_ms": 5,
-                    "details": "Disk space: 85% used"
+                    "details": "Disk space: 85% used",
                 },
                 "external_services": {
                     "status": "healthy",
                     "response_time_ms": 150,
-                    "details": "Mango Office API: OK"
-                }
-            }
-        }
-    }
+                    "details": "Mango Office API: OK",
+                },
+            },
+        },
+    },
 }
 
 
@@ -362,7 +331,7 @@ def setup_api_documentation(app: FastAPI):
     """
     # Устанавливаем кастомную схему OpenAPI
     app.openapi = lambda: get_custom_openapi_schema(app)
-    
+
     # Добавляем примеры в схемы
     _add_examples_to_schemas(app)
 
@@ -381,35 +350,31 @@ def add_examples(**examples):
     """
     Декоратор для добавления примеров к эндпоинту
     """
+
     def decorator(func):
         if not hasattr(func, "__annotations__"):
             func.__annotations__ = {}
         func.__examples__ = examples
         return func
+
     return decorator
 
 
 # Утилиты для создания документации
 def create_endpoint_docs(
-    summary: str,
-    description: str,
-    examples: dict = None,
-    responses: dict = None
+    summary: str, description: str, examples: dict = None, responses: dict = None
 ):
     """
     Создает документацию для эндпоинта
     """
-    docs = {
-        "summary": summary,
-        "description": description
-    }
-    
+    docs = {"summary": summary, "description": description}
+
     if examples:
         docs["examples"] = examples
-    
+
     if responses:
         docs["responses"] = responses
-    
+
     return docs
 
 
@@ -417,19 +382,13 @@ def create_endpoint_docs(
 COMMON_RESPONSES = {
     401: {
         "description": "Требуется аутентификация",
-        "content": {
-            "application/json": {
-                "example": {"detail": "Not authenticated"}
-            }
-        }
+        "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
     },
     403: {
         "description": "Недостаточно прав доступа",
         "content": {
-            "application/json": {
-                "example": {"detail": "Not enough permissions"}
-            }
-        }
+            "application/json": {"example": {"detail": "Not enough permissions"}}
+        },
     },
     422: {
         "description": "Ошибка валидации данных",
@@ -437,22 +396,16 @@ COMMON_RESPONSES = {
             "application/json": {
                 "example": RESPONSE_EXAMPLES["validation_error"]["value"]
             }
-        }
+        },
     },
     429: {
         "description": "Превышен лимит запросов",
-        "content": {
-            "application/json": {
-                "example": {"detail": "Rate limit exceeded"}
-            }
-        }
+        "content": {"application/json": {"example": {"detail": "Rate limit exceeded"}}},
     },
     500: {
         "description": "Внутренняя ошибка сервера",
         "content": {
-            "application/json": {
-                "example": {"detail": "Internal server error"}
-            }
-        }
-    }
-} 
+            "application/json": {"example": {"detail": "Internal server error"}}
+        },
+    },
+}

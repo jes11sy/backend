@@ -1,1 +1,1 @@
-from app.monitoring.performance import performance_monitor 
+from app.monitoring.performance import performance_monitor

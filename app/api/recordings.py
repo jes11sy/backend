@@ -12,7 +12,7 @@ router = APIRouter(prefix="/recordings", tags=["recordings"])
 async def manual_download_recordings(
     days_back: int = 1,
     db: AsyncSession = Depends(get_db),
-    current_user: Master | Employee | Administrator = Depends(require_admin)
+    current_user: Master | Employee | Administrator = Depends(require_admin),
 ):
     """Ручное скачивание записей звонков"""
     try:
@@ -21,24 +21,25 @@ async def manual_download_recordings(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error downloading recordings: {str(e)}"
+            detail=f"Error downloading recordings: {str(e)}",
         )
 
 
 @router.get("/status")
 async def get_recording_service_status(
-    current_user: Master | Employee | Administrator = Depends(require_admin)
+    current_user: Master | Employee | Administrator = Depends(require_admin),
 ):
     """Получение статуса сервиса записей"""
     return {
         "is_running": recording_service.is_running,
-        "task_active": recording_service.task is not None and not recording_service.task.done()
+        "task_active": recording_service.task is not None
+        and not recording_service.task.done(),
     }
 
 
 @router.post("/start")
 async def start_recording_service(
-    current_user: Master | Employee | Administrator = Depends(require_admin)
+    current_user: Master | Employee | Administrator = Depends(require_admin),
 ):
     """Запуск сервиса записей"""
     try:
@@ -47,13 +48,13 @@ async def start_recording_service(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error starting recording service: {str(e)}"
+            detail=f"Error starting recording service: {str(e)}",
         )
 
 
 @router.post("/stop")
 async def stop_recording_service(
-    current_user: Master | Employee | Administrator = Depends(require_admin)
+    current_user: Master | Employee | Administrator = Depends(require_admin),
 ):
     """Остановка сервиса записей"""
     try:
@@ -62,5 +63,5 @@ async def stop_recording_service(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error stopping recording service: {str(e)}"
-        ) 
+            detail=f"Error stopping recording service: {str(e)}",
+        )

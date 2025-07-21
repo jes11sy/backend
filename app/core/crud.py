@@ -5,19 +5,44 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.future import select
 import logging
 from .models import (
-    City, RequestType, Direction, Role, TransactionType,
-    AdvertisingCampaign, Master, Employee, Administrator,
-    Request, Transaction, File
+    City,
+    RequestType,
+    Direction,
+    Role,
+    TransactionType,
+    AdvertisingCampaign,
+    Master,
+    Employee,
+    Administrator,
+    Request,
+    Transaction,
+    File,
 )
 from .schemas import (
-    CityCreate, CityUpdate, RequestTypeCreate, RequestTypeUpdate,
-    DirectionCreate, DirectionUpdate, RoleCreate, RoleUpdate,
-    TransactionTypeCreate, TransactionTypeUpdate,
-    AdvertisingCampaignCreate, AdvertisingCampaignUpdate,
-    MasterCreate, MasterUpdate, EmployeeCreate, EmployeeUpdate,
-    AdministratorCreate, AdministratorUpdate,
-    RequestCreate, RequestUpdate, TransactionCreate, TransactionUpdate,
-    FileCreate, FileUpdate
+    CityCreate,
+    CityUpdate,
+    RequestTypeCreate,
+    RequestTypeUpdate,
+    DirectionCreate,
+    DirectionUpdate,
+    RoleCreate,
+    RoleUpdate,
+    TransactionTypeCreate,
+    TransactionTypeUpdate,
+    AdvertisingCampaignCreate,
+    AdvertisingCampaignUpdate,
+    MasterCreate,
+    MasterUpdate,
+    EmployeeCreate,
+    EmployeeUpdate,
+    AdministratorCreate,
+    AdministratorUpdate,
+    RequestCreate,
+    RequestUpdate,
+    TransactionCreate,
+    TransactionUpdate,
+    FileCreate,
+    FileUpdate,
 )
 from .auth import get_password_hash
 
@@ -41,7 +66,9 @@ async def get_city(db: AsyncSession, city_id: int) -> Optional[City]:
     return result.scalar_one_or_none()
 
 
-async def update_city(db: AsyncSession, city_id: int, city: CityUpdate) -> Optional[City]:
+async def update_city(
+    db: AsyncSession, city_id: int, city: CityUpdate
+) -> Optional[City]:
     result = await db.execute(select(City).where(City.id == city_id))
     db_city = result.scalar_one_or_none()
     if db_city:
@@ -64,7 +91,9 @@ async def delete_city(db: AsyncSession, city_id: int) -> bool:
 
 
 # CRUD операции для типов заявок
-async def create_request_type(db: AsyncSession, request_type: RequestTypeCreate) -> RequestType:
+async def create_request_type(
+    db: AsyncSession, request_type: RequestTypeCreate
+) -> RequestType:
     db_request_type = RequestType(**request_type.dict())
     db.add(db_request_type)
     await db.commit()
@@ -77,14 +106,19 @@ async def get_request_types(db: AsyncSession) -> List[RequestType]:
     return list(result.scalars().all())
 
 
-async def get_request_type(db: AsyncSession, request_type_id: int) -> Optional[RequestType]:
-    result = await db.execute(select(RequestType).where(RequestType.id == request_type_id))
+async def get_request_type(
+    db: AsyncSession, request_type_id: int
+) -> Optional[RequestType]:
+    result = await db.execute(
+        select(RequestType).where(RequestType.id == request_type_id)
+    )
     return result.scalar_one_or_none()
 
 
 async def get_request_type_by_name(db, name: str):
     from .models import RequestType
     from sqlalchemy.future import select
+
     result = await db.execute(select(RequestType).where(RequestType.name == name))
     return result.scalars().first()
 
@@ -123,7 +157,9 @@ async def get_roles(db: AsyncSession) -> List[Role]:
 
 
 # CRUD операции для типов транзакций
-async def create_transaction_type(db: AsyncSession, transaction_type: TransactionTypeCreate) -> TransactionType:
+async def create_transaction_type(
+    db: AsyncSession, transaction_type: TransactionTypeCreate
+) -> TransactionType:
     db_transaction_type = TransactionType(**transaction_type.dict())
     db.add(db_transaction_type)
     await db.commit()
@@ -137,7 +173,9 @@ async def get_transaction_types(db: AsyncSession) -> List[TransactionType]:
 
 
 # CRUD операции для рекламных кампаний
-async def create_advertising_campaign(db: AsyncSession, campaign: AdvertisingCampaignCreate) -> AdvertisingCampaign:
+async def create_advertising_campaign(
+    db: AsyncSession, campaign: AdvertisingCampaignCreate
+) -> AdvertisingCampaign:
     db_campaign = AdvertisingCampaign(**campaign.dict())
     db.add(db_campaign)
     await db.commit()
@@ -151,7 +189,9 @@ async def create_advertising_campaign(db: AsyncSession, campaign: AdvertisingCam
     return result.scalar_one()
 
 
-async def get_advertising_campaigns(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[AdvertisingCampaign]:
+async def get_advertising_campaigns(
+    db: AsyncSession, skip: int = 0, limit: int = 100
+) -> List[AdvertisingCampaign]:
     result = await db.execute(
         select(AdvertisingCampaign)
         .options(selectinload(AdvertisingCampaign.city))
@@ -161,7 +201,9 @@ async def get_advertising_campaigns(db: AsyncSession, skip: int = 0, limit: int 
     return list(result.scalars().all())
 
 
-async def get_advertising_campaign(db: AsyncSession, campaign_id: int) -> Optional[AdvertisingCampaign]:
+async def get_advertising_campaign(
+    db: AsyncSession, campaign_id: int
+) -> Optional[AdvertisingCampaign]:
     result = await db.execute(
         select(AdvertisingCampaign)
         .options(selectinload(AdvertisingCampaign.city))
@@ -170,8 +212,12 @@ async def get_advertising_campaign(db: AsyncSession, campaign_id: int) -> Option
     return result.scalar_one_or_none()
 
 
-async def update_advertising_campaign(db: AsyncSession, campaign_id: int, campaign: AdvertisingCampaignUpdate) -> Optional[AdvertisingCampaign]:
-    result = await db.execute(select(AdvertisingCampaign).where(AdvertisingCampaign.id == campaign_id))
+async def update_advertising_campaign(
+    db: AsyncSession, campaign_id: int, campaign: AdvertisingCampaignUpdate
+) -> Optional[AdvertisingCampaign]:
+    result = await db.execute(
+        select(AdvertisingCampaign).where(AdvertisingCampaign.id == campaign_id)
+    )
     db_campaign = result.scalar_one_or_none()
     if db_campaign:
         update_data = campaign.dict(exclude_unset=True)
@@ -184,7 +230,9 @@ async def update_advertising_campaign(db: AsyncSession, campaign_id: int, campai
 
 async def get_advertising_campaign_by_phone(db, phone_number: str):
     result = await db.execute(
-        select(AdvertisingCampaign).where(AdvertisingCampaign.phone_number == phone_number)
+        select(AdvertisingCampaign).where(
+            AdvertisingCampaign.phone_number == phone_number
+        )
     )
     return result.scalars().first()
 
@@ -194,38 +242,39 @@ async def create_master(db: AsyncSession, master: MasterCreate) -> Master:
     master_data = master.dict()
     password = master_data.pop("password")
     master_data["password_hash"] = get_password_hash(password)
-    
+
     db_master = Master(**master_data)
     db.add(db_master)
     await db.commit()
     await db.refresh(db_master)
     # ВАЖНО: получить мастера с подгруженной связью city
     result = await db.execute(
-        select(Master).options(selectinload(Master.city)).where(Master.id == db_master.id)
+        select(Master)
+        .options(selectinload(Master.city))
+        .where(Master.id == db_master.id)
     )
     return result.scalar_one()
 
 
-async def get_masters(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Master]:
+async def get_masters(
+    db: AsyncSession, skip: int = 0, limit: int = 100
+) -> List[Master]:
     result = await db.execute(
-        select(Master)
-        .options(selectinload(Master.city))
-        .offset(skip)
-        .limit(limit)
+        select(Master).options(selectinload(Master.city)).offset(skip).limit(limit)
     )
     return list(result.scalars().all())
 
 
 async def get_master(db: AsyncSession, master_id: int) -> Optional[Master]:
     result = await db.execute(
-        select(Master)
-        .options(selectinload(Master.city))
-        .where(Master.id == master_id)
+        select(Master).options(selectinload(Master.city)).where(Master.id == master_id)
     )
     return result.scalar_one_or_none()
 
 
-async def update_master(db: AsyncSession, master_id: int, master: MasterUpdate) -> Optional[Master]:
+async def update_master(
+    db: AsyncSession, master_id: int, master: MasterUpdate
+) -> Optional[Master]:
     result = await db.execute(select(Master).where(Master.id == master_id))
     db_master = result.scalar_one_or_none()
     if db_master:
@@ -242,7 +291,7 @@ async def create_employee(db: AsyncSession, employee: EmployeeCreate) -> Employe
     employee_data = employee.dict()
     password = employee_data.pop("password")
     employee_data["password_hash"] = get_password_hash(password)
-    
+
     db_employee = Employee(**employee_data)
     db.add(db_employee)
     await db.commit()
@@ -250,7 +299,9 @@ async def create_employee(db: AsyncSession, employee: EmployeeCreate) -> Employe
     return db_employee
 
 
-async def get_employees(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Employee]:
+async def get_employees(
+    db: AsyncSession, skip: int = 0, limit: int = 100
+) -> List[Employee]:
     result = await db.execute(
         select(Employee)
         .options(selectinload(Employee.role), selectinload(Employee.city))
@@ -269,7 +320,9 @@ async def get_employee(db: AsyncSession, employee_id: int) -> Optional[Employee]
     return result.scalar_one_or_none()
 
 
-async def update_employee(db: AsyncSession, employee_id: int, employee: EmployeeUpdate) -> Optional[Employee]:
+async def update_employee(
+    db: AsyncSession, employee_id: int, employee: EmployeeUpdate
+) -> Optional[Employee]:
     result = await db.execute(select(Employee).where(Employee.id == employee_id))
     db_employee = result.scalar_one_or_none()
     if db_employee:
@@ -282,11 +335,13 @@ async def update_employee(db: AsyncSession, employee_id: int, employee: Employee
 
 
 # CRUD операции для администраторов
-async def create_administrator(db: AsyncSession, administrator: AdministratorCreate) -> Administrator:
+async def create_administrator(
+    db: AsyncSession, administrator: AdministratorCreate
+) -> Administrator:
     admin_data = administrator.dict()
     password = admin_data.pop("password")
     admin_data["password_hash"] = get_password_hash(password)
-    
+
     db_administrator = Administrator(**admin_data)
     db.add(db_administrator)
     await db.commit()
@@ -294,7 +349,9 @@ async def create_administrator(db: AsyncSession, administrator: AdministratorCre
     return db_administrator
 
 
-async def get_administrators(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Administrator]:
+async def get_administrators(
+    db: AsyncSession, skip: int = 0, limit: int = 100
+) -> List[Administrator]:
     result = await db.execute(
         select(Administrator)
         .options(selectinload(Administrator.role))
@@ -304,7 +361,9 @@ async def get_administrators(db: AsyncSession, skip: int = 0, limit: int = 100) 
     return list(result.scalars().all())
 
 
-async def get_administrator(db: AsyncSession, administrator_id: int) -> Optional[Administrator]:
+async def get_administrator(
+    db: AsyncSession, administrator_id: int
+) -> Optional[Administrator]:
     result = await db.execute(
         select(Administrator)
         .options(selectinload(Administrator.role))
@@ -313,8 +372,12 @@ async def get_administrator(db: AsyncSession, administrator_id: int) -> Optional
     return result.scalar_one_or_none()
 
 
-async def update_administrator(db: AsyncSession, administrator_id: int, administrator: AdministratorUpdate) -> Optional[Administrator]:
-    result = await db.execute(select(Administrator).where(Administrator.id == administrator_id))
+async def update_administrator(
+    db: AsyncSession, administrator_id: int, administrator: AdministratorUpdate
+) -> Optional[Administrator]:
+    result = await db.execute(
+        select(Administrator).where(Administrator.id == administrator_id)
+    )
     db_administrator = result.scalar_one_or_none()
     if db_administrator:
         update_data = administrator.dict(exclude_unset=True)
@@ -340,14 +403,16 @@ async def create_request(db: AsyncSession, request: RequestCreate) -> Request:
             selectinload(Request.request_type),
             selectinload(Request.direction),
             selectinload(Request.master),
-            selectinload(Request.files)
+            selectinload(Request.files),
         )
         .where(Request.id == db_request.id)
     )
     return result.scalar_one()
 
 
-async def get_requests(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Request]:
+async def get_requests(
+    db: AsyncSession, skip: int = 0, limit: int = 100
+) -> List[Request]:
     result = await db.execute(
         select(Request)
         .options(
@@ -373,14 +438,16 @@ async def get_request(db: AsyncSession, request_id: int) -> Optional[Request]:
             selectinload(Request.request_type),
             selectinload(Request.direction),
             selectinload(Request.master),
-            selectinload(Request.files)
+            selectinload(Request.files),
         )
         .where(Request.id == request_id)
     )
     return result.scalar_one_or_none()
 
 
-async def update_request(db: AsyncSession, request_id: int, request: RequestUpdate) -> Optional[Request]:
+async def update_request(
+    db: AsyncSession, request_id: int, request: RequestUpdate
+) -> Optional[Request]:
     result = await db.execute(select(Request).where(Request.id == request_id))
     db_request = result.scalar_one_or_none()
     if db_request:
@@ -394,13 +461,18 @@ async def update_request(db: AsyncSession, request_id: int, request: RequestUpda
         # === Бизнес-логика по транзакциям ===
         # Получаем id типа транзакции "Приход"
         from .models import Transaction, TransactionType
-        transaction_type_result = await db.execute(select(TransactionType).where(TransactionType.name == "Приход"))
+
+        transaction_type_result = await db.execute(
+            select(TransactionType).where(TransactionType.name == "Приход")
+        )
         transaction_type = transaction_type_result.scalar_one_or_none()
         if transaction_type is not None:
             transaction_type_id = transaction_type.id
             # Ищем транзакцию по заявке
             transaction_result = await db.execute(
-                select(Transaction).where(Transaction.notes == f"Приход по заявке {request_id}")
+                select(Transaction).where(
+                    Transaction.notes == f"Приход по заявке {request_id}"
+                )
             )
             transaction = transaction_result.scalar_one_or_none()
             # Если новый статус Готово
@@ -410,17 +482,27 @@ async def update_request(db: AsyncSession, request_id: int, request: RequestUpda
                     transaction.amount = db_request.master_handover
                     transaction.city_id = db_request.city_id
                     transaction.transaction_type_id = transaction_type_id
-                    transaction.specified_date = db_request.updated_at if hasattr(db_request, 'updated_at') and db_request.updated_at else db_request.created_at
+                    transaction.specified_date = (
+                        db_request.updated_at
+                        if hasattr(db_request, "updated_at") and db_request.updated_at
+                        else db_request.created_at
+                    )
                     transaction.notes = f"Приход по заявке {request_id}"
                 else:
                     # Создаём новую транзакцию
                     from .schemas import TransactionCreate
+
                     new_transaction = Transaction(
                         city_id=db_request.city_id,
                         transaction_type_id=transaction_type_id,
                         amount=db_request.master_handover,
-                        specified_date=db_request.updated_at if hasattr(db_request, 'updated_at') and db_request.updated_at else db_request.created_at,
-                        notes=f"Приход по заявке {request_id}"
+                        specified_date=(
+                            db_request.updated_at
+                            if hasattr(db_request, "updated_at")
+                            and db_request.updated_at
+                            else db_request.created_at
+                        ),
+                        notes=f"Приход по заявке {request_id}",
                     )
                     db.add(new_transaction)
             # Если статус был Готово, а стал другой — удаляем транзакцию
@@ -429,7 +511,7 @@ async def update_request(db: AsyncSession, request_id: int, request: RequestUpda
                     await db.delete(transaction)
         await db.commit()
         # === END бизнес-логика ===
-        
+
         # Получить обновленную заявку с подгруженными связанными данными
         result = await db.execute(
             select(Request)
@@ -439,7 +521,7 @@ async def update_request(db: AsyncSession, request_id: int, request: RequestUpda
                 selectinload(Request.request_type),
                 selectinload(Request.direction),
                 selectinload(Request.master),
-                selectinload(Request.files)
+                selectinload(Request.files),
             )
             .where(Request.id == request_id)
         )
@@ -458,7 +540,9 @@ async def delete_request(db: AsyncSession, request_id: int) -> bool:
 
 
 # CRUD операции для транзакций
-async def create_transaction(db: AsyncSession, transaction: TransactionCreate) -> Transaction:
+async def create_transaction(
+    db: AsyncSession, transaction: TransactionCreate
+) -> Transaction:
     db_transaction = Transaction(**transaction.dict())
     db.add(db_transaction)
     await db.commit()
@@ -469,38 +553,50 @@ async def create_transaction(db: AsyncSession, transaction: TransactionCreate) -
         .options(
             selectinload(Transaction.city),
             selectinload(Transaction.transaction_type),
-            selectinload(Transaction.files)
+            selectinload(Transaction.files),
         )
         .where(Transaction.id == db_transaction.id)
     )
     return result.scalar_one()
 
 
-async def get_transactions(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Transaction]:
+async def get_transactions(
+    db: AsyncSession, skip: int = 0, limit: int = 100
+) -> List[Transaction]:
     result = await db.execute(
         select(Transaction)
-        .options(selectinload(Transaction.city), selectinload(Transaction.transaction_type), selectinload(Transaction.files))
+        .options(
+            selectinload(Transaction.city),
+            selectinload(Transaction.transaction_type),
+            selectinload(Transaction.files),
+        )
         .offset(skip)
         .limit(limit)
     )
     return list(result.scalars().all())
 
 
-async def get_transaction(db: AsyncSession, transaction_id: int) -> Optional[Transaction]:
+async def get_transaction(
+    db: AsyncSession, transaction_id: int
+) -> Optional[Transaction]:
     result = await db.execute(
         select(Transaction)
         .options(
             selectinload(Transaction.city),
             selectinload(Transaction.transaction_type),
-            selectinload(Transaction.files)
+            selectinload(Transaction.files),
         )
         .where(Transaction.id == transaction_id)
     )
     return result.scalar_one_or_none()
 
 
-async def update_transaction(db: AsyncSession, transaction_id: int, transaction: TransactionUpdate) -> Optional[Transaction]:
-    result = await db.execute(select(Transaction).where(Transaction.id == transaction_id))
+async def update_transaction(
+    db: AsyncSession, transaction_id: int, transaction: TransactionUpdate
+) -> Optional[Transaction]:
+    result = await db.execute(
+        select(Transaction).where(Transaction.id == transaction_id)
+    )
     db_transaction = result.scalar_one_or_none()
     if db_transaction:
         update_data = transaction.dict(exclude_unset=True)
@@ -508,14 +604,14 @@ async def update_transaction(db: AsyncSession, transaction_id: int, transaction:
             setattr(db_transaction, field, value)
         await db.commit()
         await db.refresh(db_transaction)
-        
+
         # Получить обновленную транзакцию с подгруженными связанными данными
         result = await db.execute(
             select(Transaction)
             .options(
                 selectinload(Transaction.city),
                 selectinload(Transaction.transaction_type),
-                selectinload(Transaction.files)
+                selectinload(Transaction.files),
             )
             .where(Transaction.id == transaction_id)
         )
@@ -524,7 +620,9 @@ async def update_transaction(db: AsyncSession, transaction_id: int, transaction:
 
 
 async def delete_transaction(db: AsyncSession, transaction_id: int) -> bool:
-    result = await db.execute(select(Transaction).where(Transaction.id == transaction_id))
+    result = await db.execute(
+        select(Transaction).where(Transaction.id == transaction_id)
+    )
     db_transaction = result.scalar_one_or_none()
     if db_transaction:
         await db.delete(db_transaction)
@@ -556,7 +654,9 @@ async def get_file(db: AsyncSession, file_id: int) -> Optional[File]:
     return result.scalar_one_or_none()
 
 
-async def update_file(db: AsyncSession, file_id: int, file: FileUpdate) -> Optional[File]:
+async def update_file(
+    db: AsyncSession, file_id: int, file: FileUpdate
+) -> Optional[File]:
     result = await db.execute(select(File).where(File.id == file_id))
     db_file = result.scalar_one_or_none()
     if db_file:
@@ -575,29 +675,34 @@ async def delete_file(db: AsyncSession, file_id: int) -> bool:
         await db.delete(db_file)
         await db.commit()
         return True
-    return False 
+    return False
+
 
 async def get_existing_new_request_by_phone(db, client_phone: str):
     from .models import Request
     from sqlalchemy.future import select
     from datetime import datetime, timedelta
-    
+
     # СТРОГАЯ ЗАЩИТА: Проверяем любые заявки за последние 30 минут
     # Это защитит от множественных вызовов webhook'а от Mango Office
     thirty_minutes_ago = datetime.now() - timedelta(minutes=30)
-    
+
     result = await db.execute(
         select(Request)
         .where(Request.client_phone == client_phone)
         .where(Request.created_at >= thirty_minutes_ago)
         .order_by(Request.created_at.desc())
     )
-    return result.scalars().first() 
+    return result.scalars().first()
+
 
 async def check_client_first_time(db, client_phone: str):
     from .models import Request
     from sqlalchemy.future import select
-    result = await db.execute(select(Request).where(Request.client_phone == client_phone))
+
+    result = await db.execute(
+        select(Request).where(Request.client_phone == client_phone)
+    )
     return result.scalars().first() is None
 
 
@@ -606,21 +711,21 @@ async def link_recording_to_request(db, recording_info: dict):
     from .models import Request
     from sqlalchemy.future import select
     from datetime import timedelta
-    
+
     try:
-        from_number = recording_info.get('from_number')
-        to_number = recording_info.get('to_number')
-        call_datetime = recording_info.get('call_datetime')
-        relative_path = recording_info.get('relative_path')
-        
+        from_number = recording_info.get("from_number")
+        to_number = recording_info.get("to_number")
+        call_datetime = recording_info.get("call_datetime")
+        relative_path = recording_info.get("relative_path")
+
         if not from_number or not call_datetime or not relative_path:
             return None
-        
+
         # Ищем заявку по номеру телефона в окне ±30 минут от времени звонка
         time_window = timedelta(minutes=30)
         start_time = call_datetime - time_window
         end_time = call_datetime + time_window
-        
+
         # Сначала ищем по номеру звонящего
         result = await db.execute(
             select(Request)
@@ -629,19 +734,21 @@ async def link_recording_to_request(db, recording_info: dict):
             .where(Request.created_at <= end_time)
             .order_by(Request.created_at.desc())
         )
-        
+
         request = result.scalars().first()
-        
+
         # Если не найдено, пробуем найти по номеру, на который звонили
         if not request:
             # Ищем рекламную кампанию по номеру
             from .models import AdvertisingCampaign
+
             campaign_result = await db.execute(
-                select(AdvertisingCampaign)
-                .where(AdvertisingCampaign.phone_number == to_number)
+                select(AdvertisingCampaign).where(
+                    AdvertisingCampaign.phone_number == to_number
+                )
             )
             campaign = campaign_result.scalars().first()
-            
+
             if campaign:
                 # Ищем заявки по этой кампании
                 result = await db.execute(
@@ -653,20 +760,24 @@ async def link_recording_to_request(db, recording_info: dict):
                     .order_by(Request.created_at.desc())
                 )
                 request = result.scalars().first()
-        
+
         if request:
             # Обновляем заявку, добавляя путь к записи
             request.recording_file_path = relative_path
             await db.commit()
             await db.refresh(request)
-            
-            logging.info(f"RECORDING LINKED: File {recording_info['filename']} linked to request {request.id}")
+
+            logging.info(
+                f"RECORDING LINKED: File {recording_info['filename']} linked to request {request.id}"
+            )
             return request
         else:
-            logging.warning(f"RECORDING NOT LINKED: No request found for phone {from_number} at {call_datetime}")
+            logging.warning(
+                f"RECORDING NOT LINKED: No request found for phone {from_number} at {call_datetime}"
+            )
             return None
-            
+
     except Exception as e:
         logging.error(f"ERROR LINKING RECORDING: {e}")
         await db.rollback()
-        return None 
+        return None
