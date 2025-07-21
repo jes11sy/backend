@@ -24,14 +24,14 @@ from .api import monitoring
 from .middleware import RateLimitMiddleware, CacheMiddleware
 
 try:
-    from .middleware.error_handler import (
+    from .middleware_handlers.error_handler import (
         ErrorHandlingMiddleware,
         RequestLoggingMiddleware,
         setup_error_handlers,
     )
 except ImportError:
     # Fallback для совместимости
-    from .middleware.error_handler import (
+    from .middleware_handlers.error_handler import (
         ErrorHandlingMiddleware,
         RequestLoggingMiddleware,
     )
