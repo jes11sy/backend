@@ -1,0 +1,183 @@
+services:
+  # Основной Backend сервис
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: backend-production
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    environment:
+      - SECRET_KEY
+      - JWT_SECRET_KEY
+      - LETSENCRYPT_EMAIL
+      - CLOUDFLARE_EMAIL
+      - CLOUDFLARE_DNS_API_TOKEN
+      - GRAFANA_ADMIN_PASSWORD
+      - POSTGRESQL_DBNAME
+      - POSTGRESQL_HOST
+      - POSTGRESQL_PASSWORD
+      - POSTGRESQL_PORT
+      - POSTGRESQL_USER
+      - REDIS_PASSWORD
+      - RAMBLER_IMAP_USERNAME
+      - RAMBLER_IMAP_PASSWORD
+      - RAMBLER_IMAP_HOST
+      - RAMBLER_IMAP_PORT
+      - RAMBLER_IMAP_USE_SSL
+      - RECORDINGS_CHECK_INTERVAL
+      - ENVIRONMENT=production
+    volumes:
+      - backend_logs:/app/logs
+      - ../media:/app/media
+      - ../data:/app/data
+    networks:
+      - backend_network
+    depends_on:
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.lead-schem.ru`)"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+
+  # Kong API Gateway
+  kong:
+    image: kong:3.4.0
+    container_name: kong-production
+    restart: unless-stopped
+    environment:
+      - KONG_DATABASE=off
+      - KONG_DECLARATIVE_CONFIG=/kong/declarative/kong.yml
+      - KONG_PROXY_ACCESS_LOG=/dev/stdout
+      - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+      - KONG_PROXY_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001
+    volumes:
+      - ./kong:/kong/declarative
+    networks:
+      - backend_network
+    depends_on:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kong.rule=Host(`api.lead-schem.ru`)"
+      - "traefik.http.routers.kong.tls=true"
+      - "traefik.http.routers.kong.tls.certresolver=letsencrypt"
+      - "traefik.http.services.kong.loadbalancer.server.port=8000"
+
+  # Redis для кеширования
+  redis:
+    image: redis:7-alpine
+    container_name: redis-production
+    restart: unless-stopped
+    command: redis-server
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend_network
+
+  # Traefik как reverse proxy с SSL
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik-production
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_data:/data
+      - ./traefik:/etc/traefik
+    networks:
+      - backend_network
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      - "--global.checknewversion=false"
+      - "--global.sendanonymoususage=false"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.lead-schem.ru`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}"
+
+  # Nginx для статических файлов
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-production
+    restart: unless-stopped
+    volumes:
+      - ../media:/usr/share/nginx/html/media:ro
+    networks:
+      - backend_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.static.rule=Host(`api.lead-schem.ru`) && PathPrefix(`/media`)"
+      - "traefik.http.routers.static.tls=true"
+      - "traefik.http.routers.static.tls.certresolver=letsencrypt"
+      - "traefik.http.services.static.loadbalancer.server.port=80"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-production
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus.yml:/etc/prometheus/custom-prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - backend_network
+    command:
+      - '--config.file=/etc/prometheus/custom-prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.lead-schem.ru`)"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.tls.certresolver=letsencrypt"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.http.routers.prometheus.middlewares=auth"
+
+networks:
+  backend_network:
+    driver: bridge
+
+volumes:
+  backend_logs:
+    driver: local
+  backend_media:
+    driver: local
+  backend_data:
+    driver: local
+  redis_data:
+    driver: local
+  traefik_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  kong_logs:
+    driver: local
