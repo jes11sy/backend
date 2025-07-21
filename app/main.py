@@ -245,7 +245,7 @@ setup_api_documentation(app)
 
 # ОПТИМИЗИРОВАННЫЙ ПОРЯДОК MIDDLEWARE (важен порядок!)
 # 1. Первым добавляем метрики (для измерения всего пайплайна)
-app.add_middleware(MetricsMiddleware, performance_collector)  # type: ignore[arg-type]
+app.add_middleware(MetricsMiddleware, performance_collector)
 
 # 2. Обработка ошибок должна быть рано в пайплайне
 app.add_middleware(ErrorHandlingMiddleware)

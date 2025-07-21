@@ -644,7 +644,8 @@ class PerformanceMetricsCollector:
 class MetricsMiddleware:
     """Middleware для сбора метрик HTTP запросов"""
 
-    def __init__(self, performance_collector: PerformanceMetricsCollector):
+    def __init__(self, app, performance_collector: PerformanceMetricsCollector):
+        self.app = app
         self.performance_collector = performance_collector
 
     async def __call__(self, request: Request, call_next):
