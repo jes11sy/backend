@@ -788,4 +788,29 @@ class HealthCheckResponse(BaseModel):
     checks: Optional[dict] = Field(None, description="Детальные проверки компонентов")
 
 
+# Недостающие схемы для совместимости
+class Token(BaseModel):
+    """Схема токена"""
+    access_token: str = Field(..., description="JWT токен доступа")
+    token_type: str = Field(default="bearer", description="Тип токена")
+
+
+class TokenData(BaseModel):
+    """Данные токена"""  
+    login: Optional[str] = Field(None, description="Логин пользователя")
+    role: Optional[str] = Field(None, description="Роль пользователя")
+    user_id: Optional[int] = Field(None, description="ID пользователя")
+
+
+class TransactionUpdateSchema(BaseModel):
+    """Схема обновления транзакции"""
+    model_config = ConfigDict(from_attributes=True)
+    
+    city_id: Optional[int] = Field(None, description="ID города")
+    transaction_type_id: Optional[int] = Field(None, description="ID типа транзакции") 
+    amount: Optional[Decimal] = Field(None, description="Сумма транзакции")
+    description: Optional[str] = Field(None, description="Описание транзакции")
+    transaction_date: Optional[date] = Field(None, description="Дата транзакции")
+
+
 

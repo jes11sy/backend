@@ -31,7 +31,7 @@ try:
     )
 except ImportError:
     # Fallback для совместимости
-    from .middleware import ErrorHandlingMiddleware, RequestLoggingMiddleware
+    from .middleware.error_handler import ErrorHandlingMiddleware, RequestLoggingMiddleware
 
     def setup_error_handlers(app):
         pass

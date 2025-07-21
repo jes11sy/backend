@@ -119,7 +119,6 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: str = ""
     CORS_ORIGINS: str = ""
 
-    @property
     def get_allowed_origins(self) -> List[str]:
         """Получить разрешенные origins для CORS"""
         # Приоритет: CORS_ORIGINS -> ALLOWED_ORIGINS -> defaults
