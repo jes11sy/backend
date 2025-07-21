@@ -483,9 +483,9 @@ async def update_request(
                     transaction.city_id = db_request.city_id
                     transaction.transaction_type_id = transaction_type_id
                     transaction.specified_date = (
-                        db_request.updated_at
+                        db_request.updated_at.date()
                         if hasattr(db_request, "updated_at") and db_request.updated_at
-                        else db_request.created_at
+                        else db_request.created_at.date()
                     )
                     transaction.notes = f"Приход по заявке {request_id}"
                 else:
@@ -497,10 +497,10 @@ async def update_request(
                         transaction_type_id=transaction_type_id,
                         amount=db_request.master_handover,
                         specified_date=(
-                            db_request.updated_at
+                            db_request.updated_at.date()
                             if hasattr(db_request, "updated_at")
                             and db_request.updated_at
-                            else db_request.created_at
+                            else db_request.created_at.date()
                         ),
                         notes=f"Приход по заявке {request_id}",
                     )

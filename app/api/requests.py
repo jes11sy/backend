@@ -467,7 +467,7 @@ async def get_callcenter_report(
                 "cancelled": 0,
             }
         city_stats[city_name]["total"] += 1
-        city_stats[city_name][request.status] += 1
+        city_stats[city_name][str(request.status)] += 1
 
     return {
         "requests": [

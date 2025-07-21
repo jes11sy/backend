@@ -353,7 +353,7 @@ async def health_check():
 
 
 @app.get("/metrics/prometheus")
-async def prometheus_metrics():
+async def get_prometheus_metrics():
     """Публичный эндпоинт для Prometheus метрик"""
     from app.monitoring.prometheus_metrics import get_metrics, get_metrics_content_type
     from fastapi.responses import Response

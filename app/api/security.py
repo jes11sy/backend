@@ -26,7 +26,9 @@ async def get_login_attempts_stats(
 ) -> Dict[str, Any]:
     """Получить статистику попыток входа"""
     try:
-        stats = {
+        from typing import Set, List, Any
+        
+        stats: Dict[str, Any] = {
             "total_attempts": 0,
             "successful_attempts": 0,
             "failed_attempts": 0,
