@@ -648,7 +648,10 @@ class MetricsMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, performance_collector: PerformanceMetricsCollector = None):
         super().__init__(app)
         if performance_collector is None:
-            from app.monitoring.metrics import performance_collector as default_collector
+            from app.monitoring.metrics import (
+                performance_collector as default_collector,
+            )
+
             performance_collector = default_collector
         self.performance_collector = performance_collector
 
