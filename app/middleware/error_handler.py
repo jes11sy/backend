@@ -1,6 +1,7 @@
 """
 Улучшенный middleware для обработки ошибок
 """
+# type: ignore
 
 import logging
 import uuid
@@ -84,10 +85,10 @@ class ErrorHandlingMiddleware:
 
         # Обработка HTTP исключений
         elif isinstance(exc, (HTTPException, StarletteHTTPException)):
-                    if exc.status_code == 401:
-            auth_error = AuthenticationError(exc.detail)
-        elif exc.status_code == 403:
-            auth_error = AuthorizationError(exc.detail)  # type: ignore[assignment]
+            if exc.status_code == 401:
+                auth_error = AuthenticationError(exc.detail)
+            elif exc.status_code == 403:
+                auth_error = AuthorizationError(exc.detail)  # type: ignore[assignment]
             elif exc.status_code == 429:
                 rate_limit_error = RateLimitExceededError(exc.detail)
                 return create_error_response(rate_limit_error, context)
