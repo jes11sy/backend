@@ -29,8 +29,8 @@ services:
       - ENVIRONMENT=production
     volumes:
       - backend_logs:/app/logs
-      - ../media:/app/media
-      - ../data:/app/data
+      - ./media:/app/media
+      - ./data:/app/data
     networks:
       - backend_network
     depends_on:
