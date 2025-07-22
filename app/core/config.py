@@ -162,7 +162,7 @@ class Settings(BaseSettings):
         # Fallback для продакшена
         return "https://lead-schem.ru"
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
