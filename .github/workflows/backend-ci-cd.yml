@@ -281,8 +281,8 @@ jobs:
           
           # Check if API is accessible
           for i in {1..5}; do
-            if curl -f -s -I https://api.${{ secrets.PRODUCTION_HOST }}/api/health > /dev/null; then
-              echo "✅ Backend API is accessible at https://api.${{ secrets.PRODUCTION_HOST }}"
+            if curl -f -s -I https://api.lead-schem.ru/health > /dev/null; then
+              echo "✅ Backend API is accessible at https://api.lead-schem.ru"
               break
             else
               echo "⏳ Attempt $i/5: API not ready yet, waiting..."
@@ -291,7 +291,7 @@ jobs:
           done
           
           # Final health check
-          if ! curl -f -s https://api.${{ secrets.PRODUCTION_HOST }}/api/health; then
+          if ! curl -f -s https://api.lead-schem.ru/health; then
             echo "❌ Backend API health check failed"
             exit 1
           fi
@@ -299,9 +299,9 @@ jobs:
       - name: 🎉 Success notification
         run: |
           echo "✅ Backend deployed to production!"
-          echo "🌐 API URL: https://api.${{ secrets.PRODUCTION_HOST }}"
-          echo "📖 Docs: https://api.${{ secrets.PRODUCTION_HOST }}/docs"
-          echo "🔍 Health: https://api.${{ secrets.PRODUCTION_HOST }}/api/health"
+          echo "🌐 API URL: https://api.lead-schem.ru"
+          echo "📖 Docs: https://api.lead-schem.ru/docs"
+          echo "🔍 Health: https://api.lead-schem.ru/health"
           echo "🐳 Docker: docker-compose deployment"
           echo "📁 Deployed to: /var/www/backend"
 
@@ -309,7 +309,7 @@ jobs:
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            MESSAGE="✅ Backend успешно задеплоен!%0A🌐 API: https://api.${{ secrets.PRODUCTION_HOST }}%0A🔍 Health: https://api.${{ secrets.PRODUCTION_HOST }}/api/health"
+            MESSAGE="✅ Backend успешно задеплоен!%0A🌐 API: https://api.lead-schem.ru%0A🔍 Health: https://api.lead-schem.ru/health"
           else
             MESSAGE="❌ Ошибка деплоя backend!%0A🔗 Логи: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi
@@ -339,14 +339,14 @@ jobs:
           
           # Test API health endpoint
           echo "Testing API health..."
-          time curl -f -s https://api.${{ secrets.PRODUCTION_HOST }}/api/health
+          time curl -f -s https://api.lead-schem.ru/health
           
           # Test API docs accessibility
           echo "Testing API docs..."
-          curl -f -s https://api.${{ secrets.PRODUCTION_HOST }}/docs > /dev/null
+          curl -f -s https://api.lead-schem.ru/docs > /dev/null
           
           # Test auth endpoint
           echo "Testing auth endpoint..."
-          curl -f -s -I https://api.${{ secrets.PRODUCTION_HOST }}/api/auth/me > /dev/null || echo "Auth endpoint OK (401 expected)"
+          curl -f -s -I https://api.lead-schem.ru/api/auth/me > /dev/null || echo "Auth endpoint OK (401 expected)"
           
           echo "✅ Basic performance tests completed" 
