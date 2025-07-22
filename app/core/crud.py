@@ -512,29 +512,6 @@ async def update_request(
         await db.commit()
         # === END бизнес-логика ===
 
-        # ✅ ИСПРАВЛЕНИЕ: Очищаем HTTP кеш после обновления заявки
-        try:
-            from .cache import cache_manager
-
-            # Очищаем кеш для конкретной заявки
-            cache_pattern_detail = f"http_cache:*/api/requests/{request_id}/*"
-            await cache_manager.clear_pattern(cache_pattern_detail)
-
-            # Очищаем кеш для списка заявок (могут быть разные фильтры)
-            cache_pattern_list = "http_cache:*/api/requests/*"
-            await cache_manager.clear_pattern(cache_pattern_list)
-
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.info(f"✅ Cleared HTTP cache after updating request {request_id}")
-
-        except Exception as e:
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.warning(f"⚠️ Failed to clear cache after request update: {e}")
-
         # Получить обновленную заявку с подгруженными связанными данными
         result = await db.execute(
             select(Request)
