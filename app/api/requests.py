@@ -150,12 +150,20 @@ async def create_new_request(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_callcenter),
 ):
-    """Создание новой заявки"""
+    """
+    Создание новой заявки
+    """
     if not request.city_id or request.city_id == 0:
         raise HTTPException(status_code=400, detail="city_id is required")
     if not request.request_type_id or request.request_type_id == 0:
         raise HTTPException(status_code=400, detail="request_type_id is required")
-    return await create_request(db=db, request=request)
+    new_request = await create_request(db=db, request=request)
+    # --- Инвалидация кэша после создания заявки ---
+    from app.core.cache import cache_manager
+
+    await cache_manager.clear_pattern("requests:*")
+    # --- Конец инвалидации кэша ---
+    return new_request
 
 
 @router.get("/", response_model=List[RequestResponse])
@@ -298,6 +306,19 @@ async def update_existing_request(
     )
     if updated_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
+
+    # --- Инвалидация кэша после обновления заявки ---
+    from app.core.cache import cache_manager
+
+    # Сброс кэша по id заявки (если используется)
+    await cache_manager.delete(f"request:{request_id}")
+    # Сброс кэша списков заявок (если используется паттерн)
+    await cache_manager.clear_pattern("requests:*")
+    # Можно добавить другие паттерны, если кэшируются связанные данные
+    # await cache_manager.clear_pattern("masters:*")
+    # await cache_manager.clear_pattern("users:*")
+    # --- Конец инвалидации кэша ---
+
     return updated_request
 
 
@@ -307,10 +328,18 @@ async def delete_existing_request(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_master),
 ):
-    """Удаление заявки"""
+    """
+    Удаление заявки
+    """
     success = await delete_request(db=db, request_id=request_id)
     if not success:
         raise HTTPException(status_code=404, detail="Request not found")
+    # --- Инвалидация кэша после удаления заявки ---
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"request:{request_id}")
+    await cache_manager.clear_pattern("requests:*")
+    # --- Конец инвалидации кэша ---
     return {"message": "Request deleted successfully"}
 
 
@@ -323,6 +352,48 @@ async def get_cities_list(
 ):
     """Получение списка городов"""
     return await get_cities(db=db)
+
+
+@router.post("/cities/", response_model=CityResponse)
+async def create_city_endpoint(
+    city: CityResponse,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_callcenter),
+):
+    """Создание нового города"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.clear_pattern("cities:*")
+    return await get_cities(db=db)
+
+
+@router.put("/cities/{city_id}", response_model=CityResponse)
+async def update_city_endpoint(
+    city_id: int,
+    city: CityResponse,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_callcenter),
+):
+    """Обновление города"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"city:{city_id}")
+    await cache_manager.clear_pattern("cities:*")
+    return await get_cities(db=db)
+
+
+@router.delete("/cities/{city_id}")
+async def delete_city_endpoint(
+    city_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_master),
+):
+    """Удаление города"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"city:{city_id}")
+    await cache_manager.clear_pattern("cities:*")
+    return {"message": "City deleted successfully"}
 
 
 @router.get("/request-types/", response_model=List[RequestTypeResponse])
@@ -339,6 +410,48 @@ async def get_request_types_list(
     return [{"id": rt.id, "name": rt.name} for rt in request_types]
 
 
+@router.post("/request-types/", response_model=RequestTypeResponse)
+async def create_request_type_endpoint(
+    request_type: RequestTypeResponse,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_callcenter),
+):
+    """Создание нового типа заявки"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.clear_pattern("request_types:*")
+    return await get_request_types(db=db)
+
+
+@router.put("/request-types/{type_id}", response_model=RequestTypeResponse)
+async def update_request_type_endpoint(
+    type_id: int,
+    request_type: RequestTypeResponse,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_callcenter),
+):
+    """Обновление типа заявки"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"request_type:{type_id}")
+    await cache_manager.clear_pattern("request_types:*")
+    return await get_request_types(db=db)
+
+
+@router.delete("/request-types/{type_id}")
+async def delete_request_type_endpoint(
+    type_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_master),
+):
+    """Удаление типа заявки"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"request_type:{type_id}")
+    await cache_manager.clear_pattern("request_types:*")
+    return {"message": "Request type deleted successfully"}
+
+
 @router.get("/directions/", response_model=List[DirectionResponse])
 async def get_directions_list(
     db: AsyncSession = Depends(get_db),
@@ -351,6 +464,48 @@ async def get_directions_list(
 
     # Преобразуем в простые словари
     return [{"id": direction.id, "name": direction.name} for direction in directions]
+
+
+@router.post("/directions/", response_model=DirectionResponse)
+async def create_direction_endpoint(
+    direction: DirectionResponse,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_callcenter),
+):
+    """Создание нового направления"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.clear_pattern("directions:*")
+    return await get_directions(db=db)
+
+
+@router.put("/directions/{direction_id}", response_model=DirectionResponse)
+async def update_direction_endpoint(
+    direction_id: int,
+    direction: DirectionResponse,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_callcenter),
+):
+    """Обновление направления"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"direction:{direction_id}")
+    await cache_manager.clear_pattern("directions:*")
+    return await get_directions(db=db)
+
+
+@router.delete("/directions/{direction_id}")
+async def delete_direction_endpoint(
+    direction_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_master),
+):
+    """Удаление направления"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"direction:{direction_id}")
+    await cache_manager.clear_pattern("directions:*")
+    return {"message": "Direction deleted successfully"}
 
 
 @router.get("/advertising-campaigns/", response_model=List[AdvertisingCampaignResponse])
@@ -394,7 +549,41 @@ async def create_advertising_campaign_endpoint(
     current_user: Master | Employee | Administrator = Depends(require_callcenter),
 ):
     """Создание новой рекламной кампании"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.clear_pattern("advertising_campaigns:*")
     return await create_advertising_campaign(db=db, campaign=campaign)
+
+
+@router.put(
+    "/advertising-campaigns/{campaign_id}", response_model=AdvertisingCampaignResponse
+)
+async def update_advertising_campaign_endpoint(
+    campaign_id: int,
+    campaign: AdvertisingCampaignResponse,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_callcenter),
+):
+    """Обновление рекламной кампании"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"advertising_campaign:{campaign_id}")
+    await cache_manager.clear_pattern("advertising_campaigns:*")
+    return await get_advertising_campaigns(db=db)
+
+
+@router.delete("/advertising-campaigns/{campaign_id}")
+async def delete_advertising_campaign_endpoint(
+    campaign_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: Master | Employee | Administrator = Depends(require_master),
+):
+    """Удаление рекламной кампании"""
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"advertising_campaign:{campaign_id}")
+    await cache_manager.clear_pattern("advertising_campaigns:*")
+    return {"message": "Advertising campaign deleted successfully"}
 
 
 @router.get("/callcenter-report")

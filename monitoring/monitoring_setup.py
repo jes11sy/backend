@@ -16,89 +16,71 @@ from typing import Dict, Any, List
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class MonitoringSetup:
     """Настройка системы мониторинга"""
-    
+
     def __init__(self):
         self.project_root = Path(__file__).parent
         self.dashboards_dir = self.project_root / "grafana_dashboards"
         self.config_dir = self.project_root / "monitoring_config"
-        
+
     def create_directories(self):
         """Создать необходимые директории"""
         directories = [
             self.dashboards_dir,
             self.config_dir,
             self.project_root / "logs",
-            self.project_root / "data"
+            self.project_root / "data",
         ]
-        
+
         for directory in directories:
             directory.mkdir(exist_ok=True)
             logger.info(f"Created directory: {directory}")
-    
+
     def install_dependencies(self):
         """Установить зависимости для мониторинга"""
-        dependencies = [
-            "prometheus-client",
-            "aiohttp",
-            "psutil",
-            "requests"
-        ]
-        
+        dependencies = ["prometheus-client", "aiohttp", "psutil", "requests"]
+
         logger.info("Installing monitoring dependencies...")
-        
+
         for dep in dependencies:
             try:
-                subprocess.run([
-                    sys.executable, "-m", "pip", "install", dep
-                ], check=True, capture_output=True)
+                subprocess.run(
+                    [sys.executable, "-m", "pip", "install", dep],
+                    check=True,
+                    capture_output=True,
+                )
                 logger.info(f"Installed: {dep}")
             except subprocess.CalledProcessError as e:
                 logger.error(f"Failed to install {dep}: {e}")
-    
+
     def generate_prometheus_config(self):
         """Создать конфигурацию Prometheus"""
         config = {
-            "global": {
-                "scrape_interval": "15s",
-                "evaluation_interval": "15s"
-            },
-            "rule_files": [
-                "alerting_rules.yml"
-            ],
+            "global": {"scrape_interval": "15s", "evaluation_interval": "15s"},
+            "rule_files": ["alerting_rules.yml"],
             "alerting": {
-                "alertmanagers": [
-                    {
-                        "static_configs": [
-                            {
-                                "targets": ["localhost:9093"]
-                            }
-                        ]
-                    }
-                ]
+                "alertmanagers": [{"static_configs": [{"targets": ["localhost:9093"]}]}]
             },
             "scrape_configs": [
                 {
                     "job_name": "requests-system",
-                    "static_configs": [
-                        {
-                            "targets": ["localhost:8001"]
-                        }
-                    ],
+                    "static_configs": [{"targets": ["localhost:8001"]}],
                     "metrics_path": "/metrics",
-                    "scrape_interval": "15s"
+                    "scrape_interval": "15s",
                 }
-            ]
+            ],
         }
-        
+
         config_file = self.config_dir / "prometheus.yml"
-        with open(config_file, 'w', encoding='utf-8') as f:
+        with open(config_file, "w", encoding="utf-8") as f:
             import yaml
+
             yaml.dump(config, f, default_flow_style=False)
-        
+
         logger.info(f"Prometheus config created: {config_file}")
-    
+
     def generate_alerting_rules(self):
         """Создать правила алертинга для Prometheus"""
         rules = {
@@ -110,40 +92,31 @@ class MonitoringSetup:
                             "alert": "HighCPUUsage",
                             "expr": "cpu_usage_percent > 80",
                             "for": "5m",
-                            "labels": {
-                                "severity": "warning",
-                                "component": "system"
-                            },
+                            "labels": {"severity": "warning", "component": "system"},
                             "annotations": {
                                 "summary": "High CPU usage",
-                                "description": "CPU usage is above 80% for 5 minutes"
-                            }
+                                "description": "CPU usage is above 80% for 5 minutes",
+                            },
                         },
                         {
                             "alert": "HighMemoryUsage",
                             "expr": "memory_usage_bytes / 1024 / 1024 / 1024 > 8",
                             "for": "5m",
-                            "labels": {
-                                "severity": "critical",
-                                "component": "system"
-                            },
+                            "labels": {"severity": "critical", "component": "system"},
                             "annotations": {
                                 "summary": "High memory usage",
-                                "description": "Memory usage is above 8GB"
-                            }
+                                "description": "Memory usage is above 8GB",
+                            },
                         },
                         {
                             "alert": "HighErrorRate",
                             "expr": "rate(errors_total[5m]) > 0.1",
                             "for": "2m",
-                            "labels": {
-                                "severity": "critical",
-                                "component": "errors"
-                            },
+                            "labels": {"severity": "critical", "component": "errors"},
                             "annotations": {
                                 "summary": "High error rate",
-                                "description": "Error rate is above threshold"
-                            }
+                                "description": "Error rate is above threshold",
+                            },
                         },
                         {
                             "alert": "HighResponseTime",
@@ -151,51 +124,46 @@ class MonitoringSetup:
                             "for": "5m",
                             "labels": {
                                 "severity": "warning",
-                                "component": "performance"
+                                "component": "performance",
                             },
                             "annotations": {
                                 "summary": "High response time",
-                                "description": "Response time is above 2 seconds"
-                            }
+                                "description": "Response time is above 2 seconds",
+                            },
                         },
                         {
                             "alert": "HighDatabaseConnections",
                             "expr": "database_connections > 20",
                             "for": "5m",
-                            "labels": {
-                                "severity": "warning",
-                                "component": "database"
-                            },
+                            "labels": {"severity": "warning", "component": "database"},
                             "annotations": {
                                 "summary": "High database connections",
-                                "description": "Too many database connections"
-                            }
+                                "description": "Too many database connections",
+                            },
                         },
                         {
                             "alert": "SecurityViolations",
                             "expr": "rate(security_violations_total[5m]) > 0",
                             "for": "1m",
-                            "labels": {
-                                "severity": "critical",
-                                "component": "security"
-                            },
+                            "labels": {"severity": "critical", "component": "security"},
                             "annotations": {
                                 "summary": "Security violations",
-                                "description": "Security violations detected"
-                            }
-                        }
-                    ]
+                                "description": "Security violations detected",
+                            },
+                        },
+                    ],
                 }
             ]
         }
-        
+
         rules_file = self.config_dir / "alerting_rules.yml"
-        with open(rules_file, 'w', encoding='utf-8') as f:
+        with open(rules_file, "w", encoding="utf-8") as f:
             import yaml
+
             yaml.dump(rules, f, default_flow_style=False)
-        
+
         logger.info(f"Alerting rules created: {rules_file}")
-    
+
     def generate_grafana_datasource_config(self):
         """Создать конфигурацию источника данных Grafana"""
         datasource_config = {
@@ -207,20 +175,19 @@ class MonitoringSetup:
                     "url": "http://localhost:9090",
                     "access": "proxy",
                     "isDefault": True,
-                    "jsonData": {
-                        "timeInterval": "15s"
-                    }
+                    "jsonData": {"timeInterval": "15s"},
                 }
-            ]
+            ],
         }
-        
+
         config_file = self.config_dir / "grafana_datasources.yml"
-        with open(config_file, 'w', encoding='utf-8') as f:
+        with open(config_file, "w", encoding="utf-8") as f:
             import yaml
+
             yaml.dump(datasource_config, f, default_flow_style=False)
-        
+
         logger.info(f"Grafana datasource config created: {config_file}")
-    
+
     def create_docker_compose(self):
         """Создать docker-compose.yml для мониторинга"""
         compose_config = {
@@ -233,7 +200,7 @@ class MonitoringSetup:
                     "volumes": [
                         f"{self.config_dir}/prometheus.yml:/etc/prometheus/prometheus.yml",
                         f"{self.config_dir}/alerting_rules.yml:/etc/prometheus/alerting_rules.yml",
-                        "prometheus_data:/prometheus"
+                        "prometheus_data:/prometheus",
                     ],
                     "command": [
                         "--config.file=/etc/prometheus/prometheus.yml",
@@ -241,9 +208,9 @@ class MonitoringSetup:
                         "--web.console.libraries=/etc/prometheus/console_libraries",
                         "--web.console.templates=/etc/prometheus/consoles",
                         "--storage.tsdb.retention.time=200h",
-                        "--web.enable-lifecycle"
+                        "--web.enable-lifecycle",
                     ],
-                    "restart": "unless-stopped"
+                    "restart": "unless-stopped",
                 },
                 "grafana": {
                     "image": "grafana/grafana:latest",
@@ -251,13 +218,13 @@ class MonitoringSetup:
                     "ports": ["3000:3000"],
                     "environment": {
                         "GF_SECURITY_ADMIN_PASSWORD": "admin",
-                        "GF_USERS_ALLOW_SIGN_UP": "false"
+                        "GF_USERS_ALLOW_SIGN_UP": "false",
                     },
                     "volumes": [
                         f"{self.config_dir}/grafana_datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml",
-                        "grafana_data:/var/lib/grafana"
+                        "grafana_data:/var/lib/grafana",
                     ],
-                    "restart": "unless-stopped"
+                    "restart": "unless-stopped",
                 },
                 "alertmanager": {
                     "image": "prom/alertmanager:latest",
@@ -268,57 +235,52 @@ class MonitoringSetup:
                     ],
                     "command": [
                         "--config.file=/etc/alertmanager/alertmanager.yml",
-                        "--storage.path=/alertmanager"
+                        "--storage.path=/alertmanager",
                     ],
-                    "restart": "unless-stopped"
-                }
+                    "restart": "unless-stopped",
+                },
             },
-            "volumes": {
-                "prometheus_data": {},
-                "grafana_data": {}
-            }
+            "volumes": {"prometheus_data": {}, "grafana_data": {}},
         }
-        
+
         compose_file = self.project_root / "docker-compose.monitoring.yml"
-        with open(compose_file, 'w', encoding='utf-8') as f:
+        with open(compose_file, "w", encoding="utf-8") as f:
             import yaml
+
             yaml.dump(compose_config, f, default_flow_style=False)
-        
+
         logger.info(f"Docker Compose file created: {compose_file}")
-    
+
     def create_alertmanager_config(self):
         """Создать конфигурацию Alertmanager"""
         config = {
             "global": {
                 "smtp_smarthost": "localhost:587",
-                "smtp_from": "alerts@yourcompany.com"
+                "smtp_from": "alerts@yourcompany.com",
             },
             "route": {
                 "group_by": ["alertname"],
                 "group_wait": "10s",
                 "group_interval": "10s",
                 "repeat_interval": "1h",
-                "receiver": "web.hook"
+                "receiver": "web.hook",
             },
             "receivers": [
                 {
                     "name": "web.hook",
-                    "webhook_configs": [
-                        {
-                            "url": "http://localhost:5001/api/alerts"
-                        }
-                    ]
+                    "webhook_configs": [{"url": "http://localhost:5001/api/alerts"}],
                 }
-            ]
+            ],
         }
-        
+
         config_file = self.config_dir / "alertmanager.yml"
-        with open(config_file, 'w', encoding='utf-8') as f:
+        with open(config_file, "w", encoding="utf-8") as f:
             import yaml
+
             yaml.dump(config, f, default_flow_style=False)
-        
+
         logger.info(f"Alertmanager config created: {config_file}")
-    
+
     def create_startup_script(self):
         """Создать скрипт запуска мониторинга"""
         script_content = """#!/bin/bash
@@ -356,16 +318,16 @@ echo "  kill $PROMETHEUS_PID $ALERTING_PID"
 trap 'echo "Остановка мониторинга..."; docker-compose -f docker-compose.monitoring.yml down; kill $PROMETHEUS_PID $ALERTING_PID; exit' INT TERM
 wait
 """
-        
+
         script_file = self.project_root / "start_monitoring.sh"
-        with open(script_file, 'w', encoding='utf-8') as f:
+        with open(script_file, "w", encoding="utf-8") as f:
             f.write(script_content)
-        
+
         # Делаем скрипт исполняемым
         os.chmod(script_file, 0o755)
-        
+
         logger.info(f"Startup script created: {script_file}")
-    
+
     def create_windows_batch_script(self):
         """Создать batch скрипт для Windows"""
         script_content = """@echo off
@@ -399,13 +361,13 @@ echo   taskkill /F /IM python.exe
 echo.
 pause
 """
-        
+
         script_file = self.project_root / "start_monitoring.bat"
-        with open(script_file, 'w', encoding='utf-8') as f:
+        with open(script_file, "w", encoding="utf-8") as f:
             f.write(script_content)
-        
+
         logger.info(f"Windows batch script created: {script_file}")
-    
+
     def create_readme(self):
         """Создать README для мониторинга"""
         readme_content = """# 📊 Система мониторинга и визуализации
@@ -555,53 +517,53 @@ docker-compose -f docker-compose.monitoring.yml up -d
 - Alertmanager: `docker logs alertmanager`
 - Приложение: `logs/monitoring.log`
 """
-        
+
         readme_file = self.project_root / "MONITORING_README.md"
-        with open(readme_file, 'w', encoding='utf-8') as f:
+        with open(readme_file, "w", encoding="utf-8") as f:
             f.write(readme_content)
-        
+
         logger.info(f"Monitoring README created: {readme_file}")
-    
+
     def setup_monitoring(self):
         """Полная настройка системы мониторинга"""
         logger.info("🔧 Настройка системы мониторинга...")
-        
+
         try:
             # Создаем директории
             self.create_directories()
-            
+
             # Устанавливаем зависимости
             self.install_dependencies()
-            
+
             # Генерируем конфигурации
             self.generate_prometheus_config()
             self.generate_alerting_rules()
             self.generate_grafana_datasource_config()
             self.create_alertmanager_config()
-            
+
             # Создаем Docker Compose
             self.create_docker_compose()
-            
+
             # Создаем скрипты запуска
             self.create_startup_script()
             self.create_windows_batch_script()
-            
+
             # Создаем документацию
             self.create_readme()
-            
+
             logger.info("✅ Система мониторинга настроена успешно!")
-            
+
             print("\n🎉 НАСТРОЙКА ЗАВЕРШЕНА!")
             print("\n📊 Доступные сервисы:")
             print("  - Prometheus: http://localhost:9090")
             print("  - Grafana: http://localhost:3000 (admin/admin)")
             print("  - Alertmanager: http://localhost:9093")
             print("  - Метрики: http://localhost:8001/metrics")
-            
+
             print("\n🚀 Для запуска:")
             print("  Linux/Mac: ./start_monitoring.sh")
             print("  Windows: start_monitoring.bat")
-            
+
         except Exception as e:
             logger.error(f"❌ Ошибка настройки: {e}")
             raise
@@ -614,4 +576,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

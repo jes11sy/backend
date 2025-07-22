@@ -21,7 +21,7 @@ MINIMAL_CONFIG = {
     "reload_dirs": ["app"],  # Только app директория
     "reload_excludes": [
         "*.log*",
-        "*.tmp*", 
+        "*.tmp*",
         "media/*",
         "__pycache__/*",
         "*.pyc",
@@ -38,7 +38,7 @@ MINIMAL_CONFIG = {
         "*.sqlite*",
         "*.db*",
         "alembic/versions/*",
-        "logs/*"
+        "logs/*",
     ],
     "log_level": "info",
     "access_log": False,
@@ -52,8 +52,5 @@ if __name__ == "__main__":
     print("📁 Отслеживание: ТОЛЬКО app/")
     print("🔄 Перезагрузка: задержка 0.5с")
     print()
-    
-    uvicorn.run(
-        "app.main:app",
-        **MINIMAL_CONFIG
-    ) 
+
+    uvicorn.run("app.main:app", **MINIMAL_CONFIG)

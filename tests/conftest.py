@@ -13,9 +13,18 @@ from datetime import datetime, date
 from app.core.config import settings
 from app.core.database import Base, get_db
 from app.core.models import (
-    City, Role, Master, Employee, Administrator, 
-    Request, Transaction, RequestType, Direction, 
-    AdvertisingCampaign, TransactionType, File
+    City,
+    Role,
+    Master,
+    Employee,
+    Administrator,
+    Request,
+    Transaction,
+    RequestType,
+    Direction,
+    AdvertisingCampaign,
+    TransactionType,
+    File,
 )
 from app.core.auth import get_password_hash
 from app.main import app
@@ -27,7 +36,7 @@ test_engine = create_async_engine(
     TEST_DATABASE_URL,
     poolclass=StaticPool,
     connect_args={"check_same_thread": False},
-    echo=False  # Отключаем логирование для тестов
+    echo=False,  # Отключаем логирование для тестов
 )
 
 TestingSessionLocal = async_sessionmaker(
@@ -49,13 +58,13 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Создает сессию базы данных для тестирования"""
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     async with TestingSessionLocal() as session:
         try:
             yield session
         finally:
             await session.close()
-    
+
     # Очищаем базу данных после каждого теста
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
@@ -76,36 +85,35 @@ async def authenticated_client(db_session: AsyncSession):
     db_session.add(role)
     await db_session.commit()
     await db_session.refresh(role)
-    
+
     employee = Employee(
         name="Test User",
         phone="1234567890",
         role_id=role.id,
-        password_hash=get_password_hash("testpassword")
+        password_hash=get_password_hash("testpassword"),
     )
     db_session.add(employee)
     await db_session.commit()
     await db_session.refresh(employee)
-    
+
     # Переопределяем зависимость базы данных
     async def override_get_db():
         yield db_session
-    
+
     app.dependency_overrides[get_db] = override_get_db
-    
+
     with TestClient(app) as test_client:
         # Получаем токен
-        response = test_client.post("/auth/token", data={
-            "username": "1234567890",
-            "password": "testpassword"
-        })
+        response = test_client.post(
+            "/auth/token", data={"username": "1234567890", "password": "testpassword"}
+        )
         token = response.json()["access_token"]
-        
+
         # Устанавливаем заголовок авторизации
         test_client.headers.update({"Authorization": f"Bearer {token}"})
-        
+
         yield test_client
-    
+
     app.dependency_overrides.clear()
 
 
@@ -155,7 +163,7 @@ async def test_request_type(db_session: AsyncSession):
     request_type = RequestType(
         name="Тестовый тип",
         description="Описание тестового типа",
-        price=Decimal("100.00")
+        price=Decimal("100.00"),
     )
     db_session.add(request_type)
     await db_session.commit()
@@ -181,7 +189,7 @@ async def test_advertising_campaign(db_session: AsyncSession):
         description="Описание тестовой кампании",
         budget=Decimal("1000.00"),
         start_date=date.today(),
-        end_date=date.today()
+        end_date=date.today(),
     )
     db_session.add(campaign)
     await db_session.commit()
@@ -193,8 +201,7 @@ async def test_advertising_campaign(db_session: AsyncSession):
 async def test_transaction_type(db_session: AsyncSession):
     """Создает тестовый тип транзакции"""
     transaction_type = TransactionType(
-        name="Тестовый тип транзакции",
-        description="Описание тестового типа транзакции"
+        name="Тестовый тип транзакции", description="Описание тестового типа транзакции"
     )
     db_session.add(transaction_type)
     await db_session.commit()
@@ -209,7 +216,7 @@ async def test_employee(db_session: AsyncSession, test_role: Role):
         name="Тестовый сотрудник",
         phone="1234567890",
         role_id=test_role.id,
-        password_hash=get_password_hash("testpassword")
+        password_hash=get_password_hash("testpassword"),
     )
     db_session.add(employee)
     await db_session.commit()
@@ -224,7 +231,7 @@ async def test_administrator(db_session: AsyncSession, test_admin_role: Role):
         name="Тестовый администратор",
         phone="0987654321",
         role_id=test_admin_role.id,
-        password_hash=get_password_hash("adminpassword")
+        password_hash=get_password_hash("adminpassword"),
     )
     db_session.add(admin)
     await db_session.commit()
@@ -233,14 +240,16 @@ async def test_administrator(db_session: AsyncSession, test_admin_role: Role):
 
 
 @pytest.fixture
-async def test_master(db_session: AsyncSession, test_master_role: Role, test_city: City):
+async def test_master(
+    db_session: AsyncSession, test_master_role: Role, test_city: City
+):
     """Создает тестового мастера"""
     master = Master(
         name="Тестовый мастер",
         phone="1111111111",
         role_id=test_master_role.id,
         password_hash=get_password_hash("masterpassword"),
-        city_id=test_city.id
+        city_id=test_city.id,
     )
     db_session.add(master)
     await db_session.commit()
@@ -255,7 +264,7 @@ async def test_request(
     test_request_type: RequestType,
     test_direction: Direction,
     test_advertising_campaign: AdvertisingCampaign,
-    test_employee: Employee
+    test_employee: Employee,
 ):
     """Создает тестовую заявку"""
     request = Request(
@@ -269,7 +278,7 @@ async def test_request(
         meeting_date=datetime.now(),
         address="Тестовый адрес",
         description="Тестовое описание",
-        status="Новая"
+        status="Новая",
     )
     db_session.add(request)
     await db_session.commit()
@@ -281,14 +290,14 @@ async def test_request(
 async def test_transaction(
     db_session: AsyncSession,
     test_request: Request,
-    test_transaction_type: TransactionType
+    test_transaction_type: TransactionType,
 ):
     """Создает тестовую транзакцию"""
     transaction = Transaction(
         request_id=test_request.id,
         transaction_type_id=test_transaction_type.id,
         amount=Decimal("100.00"),
-        description="Тестовая транзакция"
+        description="Тестовая транзакция",
     )
     db_session.add(transaction)
     await db_session.commit()
@@ -304,7 +313,7 @@ async def test_file(db_session: AsyncSession, test_request: Request):
         file_path="/test/path/test.txt",
         file_type="text/plain",
         file_size=1024,
-        request_id=test_request.id
+        request_id=test_request.id,
     )
     db_session.add(file)
     await db_session.commit()
@@ -339,10 +348,7 @@ def mock_file_service():
     mock = MagicMock()
     mock.save_file = AsyncMock(return_value="/test/path/file.txt")
     mock.delete_file = AsyncMock(return_value=True)
-    mock.get_file_info = AsyncMock(return_value={
-        "size": 1024,
-        "type": "text/plain"
-    })
+    mock.get_file_info = AsyncMock(return_value={"size": 1024, "type": "text/plain"})
     return mock
 
 
@@ -351,6 +357,7 @@ def mock_file_service():
 def disable_logging():
     """Отключает логирование в тестах"""
     import logging
+
     logging.disable(logging.CRITICAL)
     yield
     logging.disable(logging.NOTSET)
@@ -368,4 +375,4 @@ def setup_test_env():
     # Очищаем переменные после тестов
     for key in ["ENVIRONMENT", "LOG_TO_FILE", "ENABLE_MONITORING", "CACHE_ENABLED"]:
         if key in os.environ:
-            del os.environ[key] 
+            del os.environ[key]

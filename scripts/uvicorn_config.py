@@ -1,6 +1,7 @@
 """
 Конфигурация для uvicorn с настройками watchfiles
 """
+
 import os
 from pathlib import Path
 
@@ -29,7 +30,7 @@ IGNORE_PATTERNS = [
     "*.md",
     "app.log*",
     "*.log.*",
-    "logs/*"
+    "logs/*",
 ]
 
 # Конфигурация для uvicorn
@@ -44,10 +45,12 @@ UVICORN_CONFIG = {
     "use_colors": True,
 }
 
+
 def get_reload_excludes():
     """Получить список паттернов для исключения из отслеживания"""
     return IGNORE_PATTERNS
 
+
 def get_reload_dirs():
     """Получить список директорий для отслеживания"""
-    return [str(current_dir / "app")] 
+    return [str(current_dir / "app")]

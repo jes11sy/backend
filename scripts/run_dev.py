@@ -10,8 +10,5 @@ if __name__ == "__main__":
     print("🚀 Запуск сервера разработки...")
     print("📁 Отслеживаемые директории:", UVICORN_CONFIG["reload_dirs"])
     print("🚫 Игнорируемые паттерны:", UVICORN_CONFIG["reload_excludes"][:5], "...")
-    
-    uvicorn.run(
-        "app.main:app",
-        **UVICORN_CONFIG
-    ) 
+
+    uvicorn.run("app.main:app", **UVICORN_CONFIG)

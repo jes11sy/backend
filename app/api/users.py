@@ -51,8 +51,16 @@ async def create_new_master(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_manager),
 ):
-    """Создание нового мастера"""
-    return await create_master(db=db, master=master)
+    """
+    Создание нового мастера
+    """
+    new_master = await create_master(db=db, master=master)
+    # --- Инвалидация кэша после создания мастера ---
+    from app.core.cache import cache_manager
+
+    await cache_manager.clear_pattern("masters:*")
+    # --- Конец инвалидации кэша ---
+    return new_master
 
 
 @router.get("/masters/")
@@ -137,10 +145,18 @@ async def update_master_data(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_manager),
 ):
-    """Обновление данных мастера"""
+    """
+    Обновление данных мастера
+    """
     updated_master = await update_master(db=db, master_id=master_id, master=master)
     if updated_master is None:
         raise HTTPException(status_code=404, detail="Master not found")
+    # --- Инвалидация кэша после обновления мастера ---
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"master:{master_id}")
+    await cache_manager.clear_pattern("masters:*")
+    # --- Конец инвалидации кэша ---
     return updated_master
 
 
@@ -150,7 +166,9 @@ async def delete_master(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_admin),
 ):
-    """Удаление мастера (только для администраторов)"""
+    """
+    Удаление мастера
+    """
     # Проверяем существование мастера
     query = select(Master).where(Master.id == master_id)
     result = await db.execute(query)
@@ -177,7 +195,12 @@ async def delete_master(
     # Удаляем мастера
     await db.delete(master)
     await db.commit()
+    # --- Инвалидация кэша после удаления мастера ---
+    from app.core.cache import cache_manager
 
+    await cache_manager.delete(f"master:{master_id}")
+    await cache_manager.clear_pattern("masters:*")
+    # --- Конец инвалидации кэша ---
     return JSONResponse(
         content={"message": "Master deleted successfully"},
         headers={
@@ -196,8 +219,16 @@ async def create_new_employee(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_manager),
 ):
-    """Создание нового сотрудника"""
-    return await create_employee(db=db, employee=employee)
+    """
+    Создание нового сотрудника
+    """
+    new_employee = await create_employee(db=db, employee=employee)
+    # --- Инвалидация кэша после создания сотрудника ---
+    from app.core.cache import cache_manager
+
+    await cache_manager.clear_pattern("employees:*")
+    # --- Конец инвалидации кэша ---
+    return new_employee
 
 
 @router.options("/employees/")
@@ -296,12 +327,20 @@ async def update_existing_employee(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_director),
 ):
-    """Обновление сотрудника"""
+    """
+    Обновление данных сотрудника
+    """
     updated_employee = await update_employee(
         db=db, employee_id=employee_id, employee=employee
     )
     if updated_employee is None:
         raise HTTPException(status_code=404, detail="Employee not found")
+    # --- Инвалидация кэша после обновления сотрудника ---
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"employee:{employee_id}")
+    await cache_manager.clear_pattern("employees:*")
+    # --- Конец инвалидации кэша ---
     return updated_employee
 
 
@@ -311,7 +350,9 @@ async def delete_employee(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_admin),
 ):
-    """Удаление сотрудника (только для администраторов)"""
+    """
+    Удаление сотрудника
+    """
     # Проверяем существование сотрудника
     query = select(Employee).where(Employee.id == employee_id)
     result = await db.execute(query)
@@ -338,7 +379,12 @@ async def delete_employee(
     # Удаляем сотрудника
     await db.delete(employee)
     await db.commit()
+    # --- Инвалидация кэша после удаления сотрудника ---
+    from app.core.cache import cache_manager
 
+    await cache_manager.delete(f"employee:{employee_id}")
+    await cache_manager.clear_pattern("employees:*")
+    # --- Конец инвалидации кэша ---
     return JSONResponse(
         content={"message": "Employee deleted successfully"},
         headers={
@@ -357,8 +403,16 @@ async def create_new_administrator(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_admin),
 ):
-    """Создание нового администратора"""
-    return await create_administrator(db=db, administrator=administrator)
+    """
+    Создание нового администратора
+    """
+    new_administrator = await create_administrator(db=db, administrator=administrator)
+    # --- Инвалидация кэша после создания администратора ---
+    from app.core.cache import cache_manager
+
+    await cache_manager.clear_pattern("administrators:*")
+    # --- Конец инвалидации кэша ---
+    return new_administrator
 
 
 @router.options("/administrators/")
@@ -448,12 +502,20 @@ async def update_existing_administrator(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_admin),
 ):
-    """Обновление администратора"""
+    """
+    Обновление данных администратора
+    """
     updated_administrator = await update_administrator(
         db=db, administrator_id=administrator_id, administrator=administrator
     )
     if updated_administrator is None:
         raise HTTPException(status_code=404, detail="Administrator not found")
+    # --- Инвалидация кэша после обновления администратора ---
+    from app.core.cache import cache_manager
+
+    await cache_manager.delete(f"administrator:{administrator_id}")
+    await cache_manager.clear_pattern("administrators:*")
+    # --- Конец инвалидации кэша ---
     return updated_administrator
 
 
@@ -463,7 +525,9 @@ async def delete_administrator(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_admin),
 ):
-    """Удаление администратора (только для других администраторов)"""
+    """
+    Удаление администратора
+    """
     # Проверяем существование администратора
     query = select(Administrator).where(Administrator.id == administrator_id)
     result = await db.execute(query)
@@ -491,7 +555,12 @@ async def delete_administrator(
     # Удаляем администратора
     await db.delete(administrator)
     await db.commit()
+    # --- Инвалидация кэша после удаления администратора ---
+    from app.core.cache import cache_manager
 
+    await cache_manager.delete(f"administrator:{administrator_id}")
+    await cache_manager.clear_pattern("administrators:*")
+    # --- Конец инвалидации кэша ---
     return JSONResponse(
         content={"message": "Administrator deleted successfully"},
         headers={

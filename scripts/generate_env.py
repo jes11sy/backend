@@ -14,17 +14,17 @@ def generate_secret_key():
 
 def create_env_file():
     """Создание .env файла с безопасными настройками"""
-    
+
     # Проверяем, существует ли .env файл
-    if os.path.exists('.env'):
+    if os.path.exists(".env"):
         response = input("⚠️  Файл .env уже существует. Заменить? (y/N): ")
-        if response.lower() != 'y':
+        if response.lower() != "y":
             print("Отменено.")
             return
-    
+
     # Генерируем SECRET_KEY
     secret_key = generate_secret_key()
-    
+
     # Запрашиваем данные для БД
     print("🔐 Настройка базы данных:")
     db_host = input("Хост БД (localhost): ") or "localhost"
@@ -32,11 +32,13 @@ def create_env_file():
     db_user = input("Пользователь БД: ")
     db_password = input("Пароль БД: ")
     db_name = input("Имя БД: ")
-    
+
     # Выбираем окружение
     print("\n🌍 Окружение:")
-    environment = input("Окружение (development/production) [development]: ") or "development"
-    
+    environment = (
+        input("Окружение (development/production) [development]: ") or "development"
+    )
+
     # Создаем содержимое .env файла
     env_content = f"""# Database settings
 POSTGRESQL_HOST={db_host}
@@ -62,12 +64,13 @@ ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:517
 
 # Автоматически сгенерировано {secrets.token_hex(8)}
 """
-    
+
     # Записываем в файл
-    with open('.env', 'w', encoding='utf-8') as f:
+    with open(".env", "w", encoding="utf-8") as f:
         f.write(env_content)
-    
-    print(f"""
+
+    print(
+        f"""
 ✅ Файл .env успешно создан!
 
 📋 Настройки:
@@ -80,8 +83,9 @@ ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:517
 2. Используйте разные SECRET_KEY для разных окружений
 3. Убедитесь, что .env добавлен в .gitignore
 4. Для продакшена используйте HTTPS
-""")
+"""
+    )
 
 
 if __name__ == "__main__":
-    create_env_file() 
+    create_env_file()
