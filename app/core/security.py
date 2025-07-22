@@ -269,9 +269,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
     """Middleware для ограничения размера запросов"""
 
-    def __init__(self, app, max_size: int = 10 * 1024 * 1024):  # 10MB по умолчанию
+    def __init__(self, app, **kwargs):  # 10MB по умолчанию
         super().__init__(app)
-        self.max_size = max_size
+        self.max_size = kwargs.get("max_size", 10 * 1024 * 1024)
 
     async def dispatch(self, request: Request, call_next):
         # Проверяем размер тела запроса

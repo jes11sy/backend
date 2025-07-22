@@ -233,10 +233,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Middleware для ограничения частоты запросов"""
 
-    def __init__(self, app: ASGIApp, max_requests: int = 100, window_seconds: int = 60):
+    def __init__(self, app: ASGIApp, **kwargs):
         super().__init__(app)
-        self.max_requests = max_requests
-        self.window_seconds = window_seconds
+        self.max_requests = kwargs.get("max_requests", 100)
+        self.window_seconds = kwargs.get("window_seconds", 60)
         self.requests: defaultdict = defaultdict(deque)
         self.lock = asyncio.Lock()
 
