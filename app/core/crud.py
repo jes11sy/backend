@@ -172,6 +172,29 @@ async def get_transaction_types(db: AsyncSession) -> List[TransactionType]:
     return list(result.scalars().all())
 
 
+async def update_transaction_type(
+    db: AsyncSession, type_id: int, transaction_type: TransactionTypeUpdate
+) -> Optional[TransactionType]:
+    result = await db.execute(select(TransactionType).where(TransactionType.id == type_id))
+    db_type = result.scalar_one_or_none()
+    if db_type:
+        update_data = transaction_type.dict(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(db_type, field, value)
+        await db.commit()
+        await db.refresh(db_type)
+    return db_type
+
+async def delete_transaction_type(db: AsyncSession, type_id: int) -> bool:
+    result = await db.execute(select(TransactionType).where(TransactionType.id == type_id))
+    db_type = result.scalar_one_or_none()
+    if db_type:
+        await db.delete(db_type)
+        await db.commit()
+        return True
+    return False
+
+
 # CRUD операции для рекламных кампаний
 async def create_advertising_campaign(
     db: AsyncSession, campaign: AdvertisingCampaignCreate

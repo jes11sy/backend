@@ -13,6 +13,9 @@ from ..core.crud import (
     delete_transaction,
     get_cities,
     get_transaction_types,
+    create_transaction_type,
+    update_transaction_type,
+    delete_transaction_type,
 )
 from ..core.optimized_crud import OptimizedTransactionCRUD
 from ..core.schemas import (
@@ -21,6 +24,8 @@ from ..core.schemas import (
     TransactionResponse,
     CityResponse,
     TransactionTypeResponse,
+    TransactionTypeCreate,
+    TransactionTypeUpdate,
 )
 from ..core.models import (
     Master,
@@ -225,41 +230,35 @@ async def get_transaction_types_list(
 
 @router.post("/transaction-types/", response_model=TransactionTypeResponse)
 async def create_transaction_type_endpoint(
-    transaction_type: TransactionTypeResponse,
+    transaction_type: TransactionTypeCreate,
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_master),
 ):
-    """Создание нового типа транзакции"""
-    new_transaction_type = await get_transaction_types.create(
-        db=db, obj_in=transaction_type
-    )
-    # --- Инвалидация кэша после создания типа транзакции ---
+    """
+    Создание нового типа транзакции
+    """
+    new_transaction_type = await create_transaction_type(db=db, transaction_type=transaction_type)
     from app.core.cache import cache_manager
-
     await cache_manager.clear_pattern("transaction_types:*")
-    # --- Конец инвалидации кэша ---
     return new_transaction_type
 
 
 @router.put("/transaction-types/{type_id}", response_model=TransactionTypeResponse)
 async def update_transaction_type_endpoint(
     type_id: int,
-    transaction_type: TransactionTypeResponse,
+    transaction_type: TransactionTypeUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_master),
 ):
-    """Обновление типа транзакции по ID"""
-    updated_transaction_type = await get_transaction_types.update(
-        db=db, db_obj=transaction_type, obj_in=transaction_type
-    )
+    """
+    Обновление типа транзакции по ID
+    """
+    updated_transaction_type = await update_transaction_type(db=db, type_id=type_id, transaction_type=transaction_type)
     if updated_transaction_type is None:
         raise HTTPException(status_code=404, detail="Transaction type not found")
-    # --- Инвалидация кэша после обновления типа транзакции ---
     from app.core.cache import cache_manager
-
     await cache_manager.delete(f"transaction_type:{type_id}")
     await cache_manager.clear_pattern("transaction_types:*")
-    # --- Конец инвалидации кэша ---
     return updated_transaction_type
 
 
@@ -269,16 +268,15 @@ async def delete_transaction_type_endpoint(
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_master),
 ):
-    """Удаление типа транзакции по ID"""
-    success = await get_transaction_types.remove(db=db, id=type_id)
+    """
+    Удаление типа транзакции по ID
+    """
+    success = await delete_transaction_type(db=db, type_id=type_id)
     if not success:
         raise HTTPException(status_code=404, detail="Transaction type not found")
-    # --- Инвалидация кэша после удаления типа транзакции ---
     from app.core.cache import cache_manager
-
     await cache_manager.delete(f"transaction_type:{type_id}")
     await cache_manager.clear_pattern("transaction_types:*")
-    # --- Конец инвалидации кэша ---
     return {"message": "Transaction type deleted successfully"}
 
 
