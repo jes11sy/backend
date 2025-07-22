@@ -458,7 +458,9 @@ async def update_request(
         await db.commit()
         await db.refresh(db_request)
 
-        # === Бизнес-логика по транзакциям ===
+        # === Бизнес-логика по транзакциям ВРЕМЕННО ОТКЛЮЧЕНА ===
+        # ПРОБЛЕМА: эта логика вызывает rollback изменений статуса
+        """
         # Получаем id типа транзакции "Приход"
         from .models import Transaction, TransactionType
 
@@ -510,6 +512,7 @@ async def update_request(
                 if transaction:
                     await db.delete(transaction)
         await db.commit()
+        """
         # === END бизнес-логика ===
 
         # Получить обновленную заявку с подгруженными связанными данными
