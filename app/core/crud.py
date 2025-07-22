@@ -175,7 +175,9 @@ async def get_transaction_types(db: AsyncSession) -> List[TransactionType]:
 async def update_transaction_type(
     db: AsyncSession, type_id: int, transaction_type: TransactionTypeUpdate
 ) -> Optional[TransactionType]:
-    result = await db.execute(select(TransactionType).where(TransactionType.id == type_id))
+    result = await db.execute(
+        select(TransactionType).where(TransactionType.id == type_id)
+    )
     db_type = result.scalar_one_or_none()
     if db_type:
         update_data = transaction_type.dict(exclude_unset=True)
@@ -185,8 +187,11 @@ async def update_transaction_type(
         await db.refresh(db_type)
     return db_type
 
+
 async def delete_transaction_type(db: AsyncSession, type_id: int) -> bool:
-    result = await db.execute(select(TransactionType).where(TransactionType.id == type_id))
+    result = await db.execute(
+        select(TransactionType).where(TransactionType.id == type_id)
+    )
     db_type = result.scalar_one_or_none()
     if db_type:
         await db.delete(db_type)

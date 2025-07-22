@@ -237,8 +237,11 @@ async def create_transaction_type_endpoint(
     """
     Создание нового типа транзакции
     """
-    new_transaction_type = await create_transaction_type(db=db, transaction_type=transaction_type)
+    new_transaction_type = await create_transaction_type(
+        db=db, transaction_type=transaction_type
+    )
     from app.core.cache import cache_manager
+
     await cache_manager.clear_pattern("transaction_types:*")
     return new_transaction_type
 
@@ -253,10 +256,13 @@ async def update_transaction_type_endpoint(
     """
     Обновление типа транзакции по ID
     """
-    updated_transaction_type = await update_transaction_type(db=db, type_id=type_id, transaction_type=transaction_type)
+    updated_transaction_type = await update_transaction_type(
+        db=db, type_id=type_id, transaction_type=transaction_type
+    )
     if updated_transaction_type is None:
         raise HTTPException(status_code=404, detail="Transaction type not found")
     from app.core.cache import cache_manager
+
     await cache_manager.delete(f"transaction_type:{type_id}")
     await cache_manager.clear_pattern("transaction_types:*")
     return updated_transaction_type
@@ -275,6 +281,7 @@ async def delete_transaction_type_endpoint(
     if not success:
         raise HTTPException(status_code=404, detail="Transaction type not found")
     from app.core.cache import cache_manager
+
     await cache_manager.delete(f"transaction_type:{type_id}")
     await cache_manager.clear_pattern("transaction_types:*")
     return {"message": "Transaction type deleted successfully"}
