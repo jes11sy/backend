@@ -524,6 +524,27 @@ class RequestResponseSchema(BaseModel):
     created_at: datetime = Field(
         ..., description="Дата создания", examples=["2025-01-15T10:30:00"]
     )
+    
+    # ✅ ИСПРАВЛЕНИЕ: Добавляем отсутствующие финансовые поля
+    result: Optional[Decimal] = Field(
+        None, description="Результат/итог заявки", examples=[70005.00]
+    )
+    expenses: Optional[Decimal] = Field(
+        None, description="Расходы по заявке", examples=[1000.00]
+    )
+    net_amount: Optional[Decimal] = Field(
+        None, description="Чистая сумма", examples=[69005.00]
+    )
+    master_handover: Optional[Decimal] = Field(
+        None, description="Сумма для передачи мастеру", examples=[34502.50]
+    )
+    
+    # Дополнительные поля из модели
+    master_id: Optional[int] = Field(None, description="ID назначенного мастера")
+    problem: Optional[str] = Field(None, description="Описание проблемы")
+    master_notes: Optional[str] = Field(None, description="Заметки мастера")
+    direction_id: Optional[int] = Field(None, description="ID направления")
+    advertising_campaign_id: Optional[int] = Field(None, description="ID рекламной кампании")
 
     # Связанные объекты
     advertising_campaign: Optional[AdvertisingCampaignSchema] = Field(
