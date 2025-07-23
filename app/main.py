@@ -260,7 +260,7 @@ app.add_middleware(
 )
 
 # 5. Кеширование (перед логированием для оптимизации)
-app.add_middleware(CacheMiddleware, cache_ttl=settings.CACHE_TTL)
+# app.add_middleware(CacheMiddleware, cache_ttl=settings.CACHE_TTL)
 
 # 6. Логирование запросов (последним, чтобы логировать все)
 app.add_middleware(RequestLoggingMiddleware)
