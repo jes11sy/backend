@@ -8,6 +8,7 @@ from fastapi import (
     UploadFile,
     File,
     Response,
+    Request,
 )
 from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -342,6 +343,7 @@ async def update_existing_request(
     await cache_manager.invalidate_http_cache("/api/request-types")
     await cache_manager.invalidate_http_cache("/api/directions")
     await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
+    await cache_manager.invalidate_http_cache(str(request.url))
     return updated_request
 
 
@@ -375,6 +377,7 @@ async def delete_existing_request(
     await cache_manager.invalidate_http_cache("/api/request-types")
     await cache_manager.invalidate_http_cache("/api/directions")
     await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
+    await cache_manager.invalidate_http_cache(str(request.url))
     return {"message": "Request deleted successfully"}
 
 
