@@ -529,6 +529,13 @@ async def start_background_health_check(background_tasks: BackgroundTasks):
                 logger.error(f"System is unhealthy: {result}")
                 # Здесь можно добавить отправку уведомлений
 
+            # Инвалидация кэша после успешного изменения состояния
+            from app.core.cache import cache_manager
+            await cache_manager.invalidate_http_cache("/api/v1/health/status")
+            await cache_manager.invalidate_http_cache("/api/health/status")
+            await cache_manager.invalidate_http_cache("/api/v1/health/background-check")
+            await cache_manager.invalidate_http_cache("/api/health/background-check")
+
         except Exception as e:
             logger.error(f"Background health check failed: {e}")
 

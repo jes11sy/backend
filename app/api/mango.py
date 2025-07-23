@@ -11,6 +11,7 @@ import json
 import urllib.parse
 import hmac
 import hashlib
+from app.core.cache import cache_manager
 
 router = APIRouter()
 
@@ -212,6 +213,11 @@ async def mango_webhook(
         logging.warning(
             f"MANGO REQUEST CREATED: Phone {from_number}, Type: {request_type_name}, ID: {new_request.id}, Campaign: {campaign.name}, CallID: {call_id}"
         )
+
+        await cache_manager.invalidate_http_cache("/api/v1/mango/status")
+        await cache_manager.invalidate_http_cache("/api/v1/mango/webhook")
+        await cache_manager.invalidate_http_cache("/api/mango/status")
+        await cache_manager.invalidate_http_cache("/api/mango/webhook")
 
         return {
             "ok": True,

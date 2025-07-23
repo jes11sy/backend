@@ -22,6 +22,7 @@ from app.monitoring.metrics import (
 )
 from app.monitoring.prometheus_metrics import get_metrics, get_metrics_content_type
 from typing import Union
+from app.core.cache import cache_manager
 
 # Тип для пользователя (может быть Master, Employee или Administrator)
 UserType = Union[Master, Employee, Administrator]
@@ -285,6 +286,8 @@ async def record_metric_value(
 ):
     """Запись значения метрики"""
     metrics_collector.record(metric_name, value, tags, metadata)
+    await cache_manager.invalidate_http_cache(f"/api/v1/metrics/{metric_name}")
+    await cache_manager.invalidate_http_cache(f"/api/metrics/{metric_name}")
 
     return {"message": "Metric recorded successfully"}
 
@@ -300,6 +303,8 @@ async def clear_metric(
     with metrics_collector._lock:
         if metric_name in metrics_collector.metrics:
             metrics_collector.metrics[metric_name].clear()
+            await cache_manager.invalidate_http_cache(f"/api/v1/metrics/{metric_name}")
+            await cache_manager.invalidate_http_cache(f"/api/metrics/{metric_name}")
             return {"message": f"Metric {metric_name} cleared successfully"}
         else:
             raise HTTPException(status_code=404, detail="Metric not found")

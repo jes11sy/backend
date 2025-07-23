@@ -57,6 +57,12 @@ async def create_new_transaction(
 
     await cache_manager.clear_pattern("transactions:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/transactions")
+    await cache_manager.invalidate_http_cache(f"/api/v1/transactions/{new_transaction.id}")  # если есть id
+    await cache_manager.invalidate_http_cache("/api/v1/transaction-types")
+    await cache_manager.invalidate_http_cache("/api/transactions")
+    await cache_manager.invalidate_http_cache("/api/transaction-types")
     return new_transaction
 
 
@@ -152,6 +158,12 @@ async def update_existing_transaction(
     await cache_manager.delete(f"transaction:{transaction_id}")
     await cache_manager.clear_pattern("transactions:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/transactions")
+    await cache_manager.invalidate_http_cache(f"/api/v1/transactions/{transaction_id}")  # если есть id
+    await cache_manager.invalidate_http_cache("/api/v1/transaction-types")
+    await cache_manager.invalidate_http_cache("/api/transactions")
+    await cache_manager.invalidate_http_cache("/api/transaction-types")
     return updated_transaction
 
 
@@ -173,6 +185,12 @@ async def delete_existing_transaction(
     await cache_manager.delete(f"transaction:{transaction_id}")
     await cache_manager.clear_pattern("transactions:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/transactions")
+    await cache_manager.invalidate_http_cache(f"/api/v1/transactions/{transaction_id}")  # если есть id
+    await cache_manager.invalidate_http_cache("/api/v1/transaction-types")
+    await cache_manager.invalidate_http_cache("/api/transactions")
+    await cache_manager.invalidate_http_cache("/api/transaction-types")
     return {"message": "Transaction deleted successfully"}
 
 
@@ -243,6 +261,10 @@ async def create_transaction_type_endpoint(
     from app.core.cache import cache_manager
 
     await cache_manager.clear_pattern("transaction_types:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/transaction-types")
+    await cache_manager.invalidate_http_cache("/api/transactions")
+    await cache_manager.invalidate_http_cache("/api/transaction-types")
     return new_transaction_type
 
 
@@ -265,6 +287,10 @@ async def update_transaction_type_endpoint(
 
     await cache_manager.delete(f"transaction_type:{type_id}")
     await cache_manager.clear_pattern("transaction_types:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/transaction-types")
+    await cache_manager.invalidate_http_cache("/api/transactions")
+    await cache_manager.invalidate_http_cache("/api/transaction-types")
     return updated_transaction_type
 
 
@@ -284,6 +310,10 @@ async def delete_transaction_type_endpoint(
 
     await cache_manager.delete(f"transaction_type:{type_id}")
     await cache_manager.clear_pattern("transaction_types:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/transaction-types")
+    await cache_manager.invalidate_http_cache("/api/transactions")
+    await cache_manager.invalidate_http_cache("/api/transaction-types")
     return {"message": "Transaction type deleted successfully"}
 
 

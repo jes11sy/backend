@@ -18,6 +18,7 @@ from ..database_indexes import (
     get_database_statistics,
 )
 import logging
+from app.core.cache import cache_manager
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,8 @@ async def create_indexes(current_user: Administrator = Depends(require_admin)):
     """Создание индексов для оптимизации"""
     try:
         await create_database_indexes()
+        await cache_manager.invalidate_http_cache("/api/v1/database/status")
+        await cache_manager.invalidate_http_cache("/api/v1/database/indexes")
         return {
             "status": "success",
             "message": "Database indexes created successfully",
@@ -76,6 +79,8 @@ async def refresh_views(current_user: Administrator = Depends(require_admin)):
     """Обновление материализованных представлений"""
     try:
         await refresh_database_views()
+        await cache_manager.invalidate_http_cache("/api/v1/database/status")
+        await cache_manager.invalidate_http_cache("/api/v1/database/indexes")
         return {
             "status": "success",
             "message": "Materialized views refreshed successfully",
@@ -96,6 +101,8 @@ async def cleanup_old_data(
     """Очистка старых данных"""
     try:
         await cleanup_database(days_to_keep)
+        await cache_manager.invalidate_http_cache("/api/v1/database/status")
+        await cache_manager.invalidate_http_cache("/api/v1/database/indexes")
         return {
             "status": "success",
             "message": f"Database cleanup completed, kept data for {days_to_keep} days",
@@ -113,6 +120,8 @@ async def analyze_performance(current_user: Administrator = Depends(require_admi
     """Анализ производительности запросов"""
     try:
         await analyze_query_performance()
+        await cache_manager.invalidate_http_cache("/api/v1/database/status")
+        await cache_manager.invalidate_http_cache("/api/v1/database/indexes")
         return {
             "status": "success",
             "message": "Query performance analysis completed",
@@ -130,6 +139,8 @@ async def vacuum_analyze_tables(current_user: Administrator = Depends(require_ad
     """VACUUM ANALYZE всех таблиц"""
     try:
         await db_optimizer.vacuum_analyze_tables()
+        await cache_manager.invalidate_http_cache("/api/v1/database/status")
+        await cache_manager.invalidate_http_cache("/api/v1/database/indexes")
         return {
             "status": "success",
             "message": "VACUUM ANALYZE completed for all tables",
@@ -360,6 +371,8 @@ async def optimize_full(current_user: Administrator = Depends(require_admin)):
     try:
         # 1. Создаем индексы
         await create_database_indexes()
+        await cache_manager.invalidate_http_cache("/api/v1/database/status")
+        await cache_manager.invalidate_http_cache("/api/v1/database/indexes")
 
         # 2. Создаем материализованные представления
         await db_optimizer.create_materialized_views()
@@ -369,6 +382,8 @@ async def optimize_full(current_user: Administrator = Depends(require_admin)):
 
         # 4. VACUUM ANALYZE
         await db_optimizer.vacuum_analyze_tables()
+        await cache_manager.invalidate_http_cache("/api/v1/database/status")
+        await cache_manager.invalidate_http_cache("/api/v1/database/indexes")
 
         return {
             "status": "success",

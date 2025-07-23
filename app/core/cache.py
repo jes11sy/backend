@@ -178,6 +178,15 @@ class CacheManager:
             logger.error(f"Ошибка очистки кеша по паттерну: {e}")
             return 0
 
+    async def invalidate_http_cache(self, url: str):
+        """Инвалидация кэша middleware по URL"""
+        cache_key = self._generate_key(f"http_cache:{url}")
+        await self.delete(cache_key)
+
+    async def invalidate_pattern(self, pattern: str):
+        """Инвалидация кэша по паттерну (для декораторов и списков)"""
+        await self.clear_pattern(pattern)
+
     def get_stats(self) -> Dict[str, Any]:
         """Получение статистики кеша"""
         total_requests = self.cache_stats["hits"] + self.cache_stats["misses"]

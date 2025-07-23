@@ -13,6 +13,7 @@ from app.monitoring.connection_pool_monitor import pool_monitor
 from app.monitoring.redis_monitor import redis_monitor
 from app.monitoring.alerts import alert_manager, AlertSeverity, create_custom_alert
 from app.monitoring.metrics import metrics_collector
+from app.core.cache import cache_manager
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -183,6 +184,7 @@ async def acknowledge_alert(
     try:
         success = alert_manager.acknowledge_alert(alert_id)
         if success:
+            await cache_manager.invalidate_http_cache("/api/v1/monitoring/alerts")
             return JSONResponse(
                 content={"status": "acknowledged", "alert_id": alert_id}
             )
@@ -204,6 +206,7 @@ async def silence_alert(
     try:
         success = alert_manager.silence_alert(alert_id, duration_minutes)
         if success:
+            await cache_manager.invalidate_http_cache("/api/v1/monitoring/alerts")
             return JSONResponse(
                 content={
                     "status": "silenced",
@@ -236,6 +239,7 @@ async def create_custom_alert_endpoint(
             tags={"created_by": current_user.get("login", "unknown")},
         )
 
+        await cache_manager.invalidate_http_cache("/api/v1/monitoring/alerts")
         return JSONResponse(content=alert.to_dict())
 
     except Exception as e:

@@ -4,6 +4,7 @@ from ..core.database import get_db
 from ..core.auth import require_admin
 from ..services.recording_service import recording_service
 from ..core.models import Master, Employee, Administrator
+from app.core.cache import cache_manager
 
 router = APIRouter(prefix="/recordings", tags=["recordings"])
 
@@ -17,6 +18,7 @@ async def manual_download_recordings(
     """Ручное скачивание записей звонков"""
     try:
         result = await recording_service.manual_download(days_back)
+        await cache_manager.invalidate_http_cache("/api/v1/recordings")
         return result
     except Exception as e:
         raise HTTPException(
@@ -44,6 +46,7 @@ async def start_recording_service(
     """Запуск сервиса записей"""
     try:
         recording_service.start()
+        await cache_manager.invalidate_http_cache("/api/v1/recordings")
         return {"message": "Recording service started", "status": "success"}
     except Exception as e:
         raise HTTPException(
@@ -59,6 +62,7 @@ async def stop_recording_service(
     """Остановка сервиса записей"""
     try:
         recording_service.stop()
+        await cache_manager.invalidate_http_cache("/api/v1/recordings")
         return {"message": "Recording service stopped", "status": "success"}
     except Exception as e:
         raise HTTPException(

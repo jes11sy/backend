@@ -163,6 +163,17 @@ async def create_new_request(
 
     await cache_manager.clear_pattern("requests:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/requests")
+    await cache_manager.invalidate_http_cache("/api/v1/cities")
+    await cache_manager.invalidate_http_cache("/api/v1/request-types")
+    await cache_manager.invalidate_http_cache("/api/v1/directions")
+    await cache_manager.invalidate_http_cache("/api/v1/advertising-campaigns")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return new_request
 
 
@@ -318,7 +329,18 @@ async def update_existing_request(
     # await cache_manager.clear_pattern("masters:*")
     # await cache_manager.clear_pattern("users:*")
     # --- Конец инвалидации кэша ---
-
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/requests")
+    await cache_manager.invalidate_http_cache(f"/api/v1/requests/{request_id}")
+    await cache_manager.invalidate_http_cache("/api/v1/cities")
+    await cache_manager.invalidate_http_cache("/api/v1/request-types")
+    await cache_manager.invalidate_http_cache("/api/v1/directions")
+    await cache_manager.invalidate_http_cache("/api/v1/advertising-campaigns")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return updated_request
 
 
@@ -340,6 +362,18 @@ async def delete_existing_request(
     await cache_manager.delete(f"request:{request_id}")
     await cache_manager.clear_pattern("requests:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/requests")
+    await cache_manager.invalidate_http_cache(f"/api/v1/requests/{request_id}")
+    await cache_manager.invalidate_http_cache("/api/v1/cities")
+    await cache_manager.invalidate_http_cache("/api/v1/request-types")
+    await cache_manager.invalidate_http_cache("/api/v1/directions")
+    await cache_manager.invalidate_http_cache("/api/v1/advertising-campaigns")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return {"message": "Request deleted successfully"}
 
 
@@ -364,6 +398,13 @@ async def create_city_endpoint(
     from app.core.cache import cache_manager
 
     await cache_manager.clear_pattern("cities:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/cities")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return await get_cities(db=db)
 
 
@@ -379,6 +420,13 @@ async def update_city_endpoint(
 
     await cache_manager.delete(f"city:{city_id}")
     await cache_manager.clear_pattern("cities:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/cities")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return await get_cities(db=db)
 
 
@@ -393,6 +441,13 @@ async def delete_city_endpoint(
 
     await cache_manager.delete(f"city:{city_id}")
     await cache_manager.clear_pattern("cities:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/cities")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return {"message": "City deleted successfully"}
 
 
@@ -420,6 +475,13 @@ async def create_request_type_endpoint(
     from app.core.cache import cache_manager
 
     await cache_manager.clear_pattern("request_types:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/request-types")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return await get_request_types(db=db)
 
 
@@ -435,6 +497,13 @@ async def update_request_type_endpoint(
 
     await cache_manager.delete(f"request_type:{type_id}")
     await cache_manager.clear_pattern("request_types:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/request-types")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return await get_request_types(db=db)
 
 
@@ -449,6 +518,13 @@ async def delete_request_type_endpoint(
 
     await cache_manager.delete(f"request_type:{type_id}")
     await cache_manager.clear_pattern("request_types:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/request-types")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return {"message": "Request type deleted successfully"}
 
 
@@ -476,6 +552,13 @@ async def create_direction_endpoint(
     from app.core.cache import cache_manager
 
     await cache_manager.clear_pattern("directions:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/directions")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return await get_directions(db=db)
 
 
@@ -491,6 +574,13 @@ async def update_direction_endpoint(
 
     await cache_manager.delete(f"direction:{direction_id}")
     await cache_manager.clear_pattern("directions:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/directions")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return await get_directions(db=db)
 
 
@@ -505,6 +595,13 @@ async def delete_direction_endpoint(
 
     await cache_manager.delete(f"direction:{direction_id}")
     await cache_manager.clear_pattern("directions:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/directions")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return {"message": "Direction deleted successfully"}
 
 
@@ -552,6 +649,13 @@ async def create_advertising_campaign_endpoint(
     from app.core.cache import cache_manager
 
     await cache_manager.clear_pattern("advertising_campaigns:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/advertising-campaigns")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return await create_advertising_campaign(db=db, campaign=campaign)
 
 
@@ -569,6 +673,13 @@ async def update_advertising_campaign_endpoint(
 
     await cache_manager.delete(f"advertising_campaign:{campaign_id}")
     await cache_manager.clear_pattern("advertising_campaigns:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/advertising-campaigns")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return await get_advertising_campaigns(db=db)
 
 
@@ -583,6 +694,13 @@ async def delete_advertising_campaign_endpoint(
 
     await cache_manager.delete(f"advertising_campaign:{campaign_id}")
     await cache_manager.clear_pattern("advertising_campaigns:*")
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/advertising-campaigns")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return {"message": "Advertising campaign deleted successfully"}
 
 
@@ -797,6 +915,18 @@ async def upload_bso_file(
     from ..core.crud import update_request
 
     await update_request(db, request_id, RequestUpdate(bso_file_path=file_path))  # type: ignore
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/requests")
+    await cache_manager.invalidate_http_cache(f"/api/v1/requests/{request_id}")
+    await cache_manager.invalidate_http_cache("/api/v1/cities")
+    await cache_manager.invalidate_http_cache("/api/v1/request-types")
+    await cache_manager.invalidate_http_cache("/api/v1/directions")
+    await cache_manager.invalidate_http_cache("/api/v1/advertising-campaigns")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return {"file_path": file_path}
 
 
@@ -821,6 +951,18 @@ async def upload_expense_file(
     from ..core.crud import update_request
 
     await update_request(db, request_id, RequestUpdate(expense_file_path=file_path))  # type: ignore
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/requests")
+    await cache_manager.invalidate_http_cache(f"/api/v1/requests/{request_id}")
+    await cache_manager.invalidate_http_cache("/api/v1/cities")
+    await cache_manager.invalidate_http_cache("/api/v1/request-types")
+    await cache_manager.invalidate_http_cache("/api/v1/directions")
+    await cache_manager.invalidate_http_cache("/api/v1/advertising-campaigns")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return {"file_path": file_path}
 
 
@@ -845,4 +987,16 @@ async def upload_recording_file(
     from ..core.crud import update_request
 
     await update_request(db, request_id, RequestUpdate(recording_file_path=file_path))  # type: ignore
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/requests")
+    await cache_manager.invalidate_http_cache(f"/api/v1/requests/{request_id}")
+    await cache_manager.invalidate_http_cache("/api/v1/cities")
+    await cache_manager.invalidate_http_cache("/api/v1/request-types")
+    await cache_manager.invalidate_http_cache("/api/v1/directions")
+    await cache_manager.invalidate_http_cache("/api/v1/advertising-campaigns")
+    await cache_manager.invalidate_http_cache("/api/requests")
+    await cache_manager.invalidate_http_cache("/api/cities")
+    await cache_manager.invalidate_http_cache("/api/request-types")
+    await cache_manager.invalidate_http_cache("/api/directions")
+    await cache_manager.invalidate_http_cache("/api/advertising-campaigns")
     return {"file_path": file_path}

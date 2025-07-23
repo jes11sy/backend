@@ -60,6 +60,15 @@ async def create_new_master(
 
     await cache_manager.clear_pattern("masters:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/users")
+    await cache_manager.invalidate_http_cache("/api/v1/users/masters")
+    await cache_manager.invalidate_http_cache("/api/v1/users/employees")
+    await cache_manager.invalidate_http_cache("/api/v1/users/administrators")
+    await cache_manager.invalidate_http_cache("/api/users")
+    await cache_manager.invalidate_http_cache("/api/users/masters")
+    await cache_manager.invalidate_http_cache("/api/users/employees")
+    await cache_manager.invalidate_http_cache("/api/users/administrators")
     return new_master
 
 
@@ -157,6 +166,15 @@ async def update_master_data(
     await cache_manager.delete(f"master:{master_id}")
     await cache_manager.clear_pattern("masters:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/users")
+    await cache_manager.invalidate_http_cache("/api/v1/users/masters")
+    await cache_manager.invalidate_http_cache("/api/v1/users/employees")
+    await cache_manager.invalidate_http_cache("/api/v1/users/administrators")
+    await cache_manager.invalidate_http_cache("/api/users")
+    await cache_manager.invalidate_http_cache("/api/users/masters")
+    await cache_manager.invalidate_http_cache("/api/users/employees")
+    await cache_manager.invalidate_http_cache("/api/users/administrators")
     return updated_master
 
 
@@ -201,6 +219,15 @@ async def delete_master(
     await cache_manager.delete(f"master:{master_id}")
     await cache_manager.clear_pattern("masters:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/users")
+    await cache_manager.invalidate_http_cache("/api/v1/users/masters")
+    await cache_manager.invalidate_http_cache("/api/v1/users/employees")
+    await cache_manager.invalidate_http_cache("/api/v1/users/administrators")
+    await cache_manager.invalidate_http_cache("/api/users")
+    await cache_manager.invalidate_http_cache("/api/users/masters")
+    await cache_manager.invalidate_http_cache("/api/users/employees")
+    await cache_manager.invalidate_http_cache("/api/users/administrators")
     return JSONResponse(
         content={"message": "Master deleted successfully"},
         headers={
@@ -228,6 +255,15 @@ async def create_new_employee(
 
     await cache_manager.clear_pattern("employees:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/users")
+    await cache_manager.invalidate_http_cache("/api/v1/users/masters")
+    await cache_manager.invalidate_http_cache("/api/v1/users/employees")
+    await cache_manager.invalidate_http_cache("/api/v1/users/administrators")
+    await cache_manager.invalidate_http_cache("/api/users")
+    await cache_manager.invalidate_http_cache("/api/users/masters")
+    await cache_manager.invalidate_http_cache("/api/users/employees")
+    await cache_manager.invalidate_http_cache("/api/users/administrators")
     return new_employee
 
 
@@ -341,6 +377,15 @@ async def update_existing_employee(
     await cache_manager.delete(f"employee:{employee_id}")
     await cache_manager.clear_pattern("employees:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/users")
+    await cache_manager.invalidate_http_cache("/api/v1/users/masters")
+    await cache_manager.invalidate_http_cache("/api/v1/users/employees")
+    await cache_manager.invalidate_http_cache("/api/v1/users/administrators")
+    await cache_manager.invalidate_http_cache("/api/users")
+    await cache_manager.invalidate_http_cache("/api/users/masters")
+    await cache_manager.invalidate_http_cache("/api/users/employees")
+    await cache_manager.invalidate_http_cache("/api/users/administrators")
     return updated_employee
 
 
@@ -385,6 +430,15 @@ async def delete_employee(
     await cache_manager.delete(f"employee:{employee_id}")
     await cache_manager.clear_pattern("employees:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/users")
+    await cache_manager.invalidate_http_cache("/api/v1/users/masters")
+    await cache_manager.invalidate_http_cache("/api/v1/users/employees")
+    await cache_manager.invalidate_http_cache("/api/v1/users/administrators")
+    await cache_manager.invalidate_http_cache("/api/users")
+    await cache_manager.invalidate_http_cache("/api/users/masters")
+    await cache_manager.invalidate_http_cache("/api/users/employees")
+    await cache_manager.invalidate_http_cache("/api/users/administrators")
     return JSONResponse(
         content={"message": "Employee deleted successfully"},
         headers={
@@ -412,6 +466,15 @@ async def create_new_administrator(
 
     await cache_manager.clear_pattern("administrators:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/users")
+    await cache_manager.invalidate_http_cache("/api/v1/users/masters")
+    await cache_manager.invalidate_http_cache("/api/v1/users/employees")
+    await cache_manager.invalidate_http_cache("/api/v1/users/administrators")
+    await cache_manager.invalidate_http_cache("/api/users")
+    await cache_manager.invalidate_http_cache("/api/users/masters")
+    await cache_manager.invalidate_http_cache("/api/users/employees")
+    await cache_manager.invalidate_http_cache("/api/users/administrators")
     return new_administrator
 
 
@@ -516,6 +579,15 @@ async def update_existing_administrator(
     await cache_manager.delete(f"administrator:{administrator_id}")
     await cache_manager.clear_pattern("administrators:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/users")
+    await cache_manager.invalidate_http_cache("/api/v1/users/masters")
+    await cache_manager.invalidate_http_cache("/api/v1/users/employees")
+    await cache_manager.invalidate_http_cache("/api/v1/users/administrators")
+    await cache_manager.invalidate_http_cache("/api/users")
+    await cache_manager.invalidate_http_cache("/api/users/masters")
+    await cache_manager.invalidate_http_cache("/api/users/employees")
+    await cache_manager.invalidate_http_cache("/api/users/administrators")
     return updated_administrator
 
 
@@ -561,6 +633,15 @@ async def delete_administrator(
     await cache_manager.delete(f"administrator:{administrator_id}")
     await cache_manager.clear_pattern("administrators:*")
     # --- Конец инвалидации кэша ---
+    # Инвалидация кэша GET-запросов (middleware)
+    await cache_manager.invalidate_http_cache("/api/v1/users")
+    await cache_manager.invalidate_http_cache("/api/v1/users/masters")
+    await cache_manager.invalidate_http_cache("/api/v1/users/employees")
+    await cache_manager.invalidate_http_cache("/api/v1/users/administrators")
+    await cache_manager.invalidate_http_cache("/api/users")
+    await cache_manager.invalidate_http_cache("/api/users/masters")
+    await cache_manager.invalidate_http_cache("/api/users/employees")
+    await cache_manager.invalidate_http_cache("/api/users/administrators")
     return JSONResponse(
         content={"message": "Administrator deleted successfully"},
         headers={

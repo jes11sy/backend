@@ -14,6 +14,7 @@ from ..utils.file_security import (
     FileSecurityError,
     delete_file_safely,
 )
+from app.core.cache import cache_manager
 
 router = APIRouter()
 
@@ -126,6 +127,9 @@ async def upload_expense_receipt(
         logging.info(
             f"Файл '{original_name}' успешно загружен пользователем {getattr(current_user, 'id', 'unknown')}"
         )
+
+        await cache_manager.invalidate_http_cache("/api/v1/files")
+        await cache_manager.invalidate_http_cache("/api/files")
 
         return JSONResponse(
             status_code=200,

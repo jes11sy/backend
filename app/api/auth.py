@@ -15,6 +15,7 @@ from ..core.models import Master, Employee, Administrator
 from ..core.config import settings
 from ..core.security import LoginAttemptTracker, get_client_ip, CSRFProtection
 import secrets
+from app.core.cache import cache_manager
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -199,6 +200,11 @@ async def logout(response: Response):
         samesite="lax",
         domain=None,
     )
+
+    await cache_manager.invalidate_http_cache("/api/v1/users/me")
+    await cache_manager.invalidate_http_cache("/api/v1/auth/status")
+    await cache_manager.invalidate_http_cache("/api/users/me")
+    await cache_manager.invalidate_http_cache("/api/auth/status")
 
     return {"message": "Logged out successfully"}
 
