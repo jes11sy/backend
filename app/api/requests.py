@@ -309,13 +309,14 @@ async def read_requests(
 @router.put("/{request_id}/", response_model=RequestResponse)
 async def update_existing_request(
     request_id: int,
-    request: RequestUpdate,
+    request_data: RequestUpdate,
+    request: Request,  # <-- добавлен аргумент
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_callcenter),
 ):
     """Обновление заявки"""
     updated_request = await update_request(
-        db=db, request_id=request_id, request=request
+        db=db, request_id=request_id, request=request_data
     )
     if updated_request is None:
         raise HTTPException(status_code=404, detail="Request not found")
@@ -350,6 +351,7 @@ async def update_existing_request(
 @router.delete("/{request_id}/")
 async def delete_existing_request(
     request_id: int,
+    request: Request,  # <-- добавлен аргумент
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_master),
 ):
