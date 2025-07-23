@@ -18,6 +18,7 @@ import os
 from uuid import uuid4
 from datetime import datetime
 
+from app.core.cache import cache_manager
 from ..core.database import get_db
 from ..core.auth import require_master, require_callcenter
 from ..core.config import settings
