@@ -8,7 +8,7 @@ from fastapi import (
     UploadFile,
     File,
     Response,
-    Request,
+    Request as FastapiRequest,
 )
 from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -310,7 +310,7 @@ async def read_requests(
 async def update_existing_request(
     request_id: int,
     request_data: RequestUpdate,
-    request: Request,  # <-- добавлен аргумент
+    request: FastapiRequest,  # <-- исправлено
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_callcenter),
 ):
@@ -351,7 +351,7 @@ async def update_existing_request(
 @router.delete("/{request_id}/")
 async def delete_existing_request(
     request_id: int,
-    request: Request,  # <-- добавлен аргумент
+    request: FastapiRequest,  # <-- исправлено
     db: AsyncSession = Depends(get_db),
     current_user: Master | Employee | Administrator = Depends(require_master),
 ):
