@@ -59,7 +59,9 @@ async def create_new_transaction(
     # --- Конец инвалидации кэша ---
     # Инвалидация кэша GET-запросов (middleware)
     await cache_manager.invalidate_http_cache("/api/v1/transactions")
-    await cache_manager.invalidate_http_cache(f"/api/v1/transactions/{new_transaction.id}")  # если есть id
+    await cache_manager.invalidate_http_cache(
+        f"/api/v1/transactions/{new_transaction.id}"
+    )  # если есть id
     await cache_manager.invalidate_http_cache("/api/v1/transaction-types")
     await cache_manager.invalidate_http_cache("/api/transactions")
     await cache_manager.invalidate_http_cache("/api/transaction-types")
@@ -160,7 +162,9 @@ async def update_existing_transaction(
     # --- Конец инвалидации кэша ---
     # Инвалидация кэша GET-запросов (middleware)
     await cache_manager.invalidate_http_cache("/api/v1/transactions")
-    await cache_manager.invalidate_http_cache(f"/api/v1/transactions/{transaction_id}")  # если есть id
+    await cache_manager.invalidate_http_cache(
+        f"/api/v1/transactions/{transaction_id}"
+    )  # если есть id
     await cache_manager.invalidate_http_cache("/api/v1/transaction-types")
     await cache_manager.invalidate_http_cache("/api/transactions")
     await cache_manager.invalidate_http_cache("/api/transaction-types")
@@ -187,7 +191,9 @@ async def delete_existing_transaction(
     # --- Конец инвалидации кэша ---
     # Инвалидация кэша GET-запросов (middleware)
     await cache_manager.invalidate_http_cache("/api/v1/transactions")
-    await cache_manager.invalidate_http_cache(f"/api/v1/transactions/{transaction_id}")  # если есть id
+    await cache_manager.invalidate_http_cache(
+        f"/api/v1/transactions/{transaction_id}"
+    )  # если есть id
     await cache_manager.invalidate_http_cache("/api/v1/transaction-types")
     await cache_manager.invalidate_http_cache("/api/transactions")
     await cache_manager.invalidate_http_cache("/api/transaction-types")

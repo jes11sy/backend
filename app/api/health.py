@@ -531,6 +531,7 @@ async def start_background_health_check(background_tasks: BackgroundTasks):
 
             # Инвалидация кэша после успешного изменения состояния
             from app.core.cache import cache_manager
+
             await cache_manager.invalidate_http_cache("/api/v1/health/status")
             await cache_manager.invalidate_http_cache("/api/health/status")
             await cache_manager.invalidate_http_cache("/api/v1/health/background-check")
