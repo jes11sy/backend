@@ -228,7 +228,7 @@ if not cors_origins:
         "http://localhost:3000",
         "https://lead-schem.ru",
         "https://www.lead-schem.ru",
-        "http://master.lead-schem.ru/",
+        "https://master.lead-schem.ru",
     ]
 
 logger.info(f"CORS origins configured: {cors_origins}")
